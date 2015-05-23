@@ -6,7 +6,6 @@ class SimpleCommand < Clin::Command
   self.arguments = 'display <message>'
 
   option :echo, '-e', '--echo ECHO', 'Echo some text'
-
   general_option Clin::HelpOptions
 
   def initialize(options)

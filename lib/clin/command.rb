@@ -38,7 +38,7 @@ class Clin::Command < Clin::CommandOptions
 
     rem = parser.parse(argv)
     out.merge!(parse_arguments(rem))
-    new(out)
+    new(out.delete_if { |_, v| v.nil? })
   end
 
   # Parse the argument. The options must have been strip out first.

@@ -1,5 +1,6 @@
 require 'clin'
 
+# Option container.
 class Clin::Option
   attr_accessor :name
   attr_accessor :args
@@ -19,12 +20,12 @@ class Clin::Option
 
   def extract(opts, out)
     if @block.nil?
-      opts.on(*args) do | value|
+      opts.on(*args) do |value|
         on(value, out)
       end
     else
       opts.on(*args) do |value|
-        block.call(opts, value)
+        block.call(opts, out, value)
       end
     end
   end

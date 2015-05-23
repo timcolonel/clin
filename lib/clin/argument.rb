@@ -1,5 +1,6 @@
 require 'clin'
 
+# Command line positional argument(not option)
 class Clin::Argument
   attr_accessor :original
   attr_accessor :optional
