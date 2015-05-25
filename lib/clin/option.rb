@@ -33,4 +33,9 @@ class Clin::Option
   def on(value, out)
     out[@name] = value
   end
+
+  def ==(other)
+    return false unless other.is_a? Clin::Option
+    @name == other.name && @args == other.args && @block == other.block
+  end
 end

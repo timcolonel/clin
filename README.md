@@ -1,4 +1,7 @@
 # Clin
+[![Build Status](https://travis-ci.org/timcolonel/clin.svg?branch=master)](https://travis-ci.org/timcolonel/clin)
+[![Coverage Status](https://coveralls.io/repos/timcolonel/clin/badge.svg?branch=master)](https://coveralls.io/r/timcolonel/clin?branch=master)
+[![Code Climate](https://codeclimate.com/github/timcolonel/clin/badges/gpa.svg)](https://codeclimate.com/github/timcolonel/clin)
 
 TODO: Write a gem description
 

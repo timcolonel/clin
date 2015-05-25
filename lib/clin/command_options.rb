@@ -1,6 +1,8 @@
 require 'clin'
 require 'clin/option'
 
+# Template class for reusable options and commands
+# It provide the method to add options to a command
 class Clin::CommandOptions
   class_attribute :options
 
@@ -21,7 +23,7 @@ class Clin::CommandOptions
   #   end
   # ```
   def self.option(*args, &block)
-    add_option Clin::Option.new(*args, &block)
+     add_option Clin::Option.new(*args, &block)
   end
 
   def self.add_option(option)
