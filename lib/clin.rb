@@ -8,5 +8,6 @@ module Clin
 end
 
 require 'clin/command'
+require 'clin/command_dispatcher'
 require 'clin/common/help_options'
 require 'clin/errors'

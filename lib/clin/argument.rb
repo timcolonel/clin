@@ -50,10 +50,7 @@ class Clin::Argument
 
   # Given a list of arguments extract the list of arguments that are matched
   def parse(argv)
-    if argv.empty?
-      return nil, [] if optional
-      fail Clin::CommandLineError, "Missing arguments: #{@name}"
-    end
+    return handle_empty if argv.empty?
     if @multiple
       ensure_name(argv) unless @variable
       [argv, []]
@@ -68,8 +65,22 @@ class Clin::Argument
   def ensure_name(args)
     [*args].each do |arg|
       if arg != @name
-        fail Clin::CommandLineError, "Error expecting argument '#{arg}' to be '#{@name}'"
+        fail Clin::FixedArgumentError, "Error expecting argument '#{arg}' to be '#{@name}'"
       end
+    end
+  end
+
+  # Call when the argv is empty.
+  # Will return nil, [] if the argument is optional
+  # Will fail otherwise:
+  # * MissingArgumentError if the argument is a variable(e.g. <arg>)
+  # * FixedArgumentError if the argument is fixed(e.g. display)
+  def handle_empty
+    return nil, [] if optional
+    if @variable
+      fail Clin::MissingArgumentError, @name
+    else
+      fail Clin::FixedArgumentError, @name
     end
   end
 end

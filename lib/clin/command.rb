@@ -19,9 +19,13 @@ class Clin::Command < Clin::CommandOptions
     end
   end
 
-  def self.banner
-    a = ['Usage:', exe_name, args.map(&:original).join(' '), '[Options]']
+  def self.usage
+    a = [exe_name, args.map(&:original).join(' '), '[Options]']
     a.reject(&:blank?).join(' ')
+  end
+
+  def self.banner
+    "Usage: #{usage}"
   end
 
   # Parse the command and initialize the command object with the parsed options
@@ -30,7 +34,14 @@ class Clin::Command < Clin::CommandOptions
     argv = Shellwords.split(argv) if argv.is_a? String
     argv = argv.clone
     options_map = parse_options(argv)
-    args_map = parse_arguments(argv)
+    error = nil
+    begin
+      args_map = parse_arguments(argv)
+    rescue Clin::MissingArgumentError => e
+      error = e
+    end
+    execute_general_options(options_map)
+    fail error unless error.nil?
     new(options_map.merge(args_map))
   end
 
@@ -43,11 +54,20 @@ class Clin::Command < Clin::CommandOptions
       opts.separator ''
       opts.separator 'Options:'
       extract_options(opts, out)
-      opts.separator 'Description:'
-      opts.separator description
+      unless description.blank?
+        opts.separator "\nDescription:"
+        opts.separator description
+      end
+      opts.separator ''
     end
     parser.parse!(argv)
     out
+  end
+
+  def self.execute_general_options(options)
+    general_options.each do |gopts|
+      gopts.execute_options(options)
+    end
   end
 
   # Parse the argument. The options must have been strip out first.
