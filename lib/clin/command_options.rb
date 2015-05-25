@@ -23,7 +23,7 @@ class Clin::CommandOptions
   #   end
   # ```
   def self.option(*args, &block)
-     add_option Clin::Option.new(*args, &block)
+    add_option Clin::Option.new(*args, &block)
   end
 
   def self.add_option(option)

@@ -6,7 +6,6 @@ class Clin::Option
   attr_accessor :args
   attr_accessor :block
 
-
   def initialize(*args, &block)
     if block.nil?
       name = args.shift

@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version = Clin::VERSION
   spec.authors = ['Timothee Guerin']
   spec.email = ['timothee.guerin@outlook.com']
-  spec.summary = %q{Clin provide an advance way to define complex command line interface.}
-  spec.description = %q{Write a longer description. Optional.}
+  spec.summary = 'Clin provide an advance way to define complex command line interface.'
+  spec.description = ''
   spec.homepage = ''
   spec.license = 'MIT'
 
@@ -23,5 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'coveralls'
-
+  spec.add_development_dependency 'faker'
 end
