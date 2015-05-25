@@ -14,8 +14,8 @@ module Clin
 
   # Error when a command is missing an argument
   class MissingArgumentError < ArgumentError
-    def to_s
-      "Missing argument #{message}"
+    def initialize(message = '')
+      super("Missing argument #{message}")
     end
   end
 
