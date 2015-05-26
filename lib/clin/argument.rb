@@ -19,10 +19,7 @@ class Clin::Argument
   end
 
   def check_optional(argument)
-    if argument[0] == '['
-      if argument[-1] != ']'
-        fail Clin::Error, 'Argument format error! Cannot start with [ and not end with ]'
-      end
+    if check_between(argument, '[', ']')
       @optional = true
       return argument[1...-1]
     end
@@ -38,10 +35,7 @@ class Clin::Argument
   end
 
   def check_variable(argument)
-    if argument[0] == '<'
-      if argument[-1] != '>'
-        fail Clin::Error, 'Argument format error! Cannot start with < and not end with >'
-      end
+    if check_between(argument, '<', '>')
       @variable = true
       return argument[1...-1]
     end
@@ -82,5 +76,15 @@ class Clin::Argument
     else
       fail Clin::FixedArgumentError, @name
     end
+  end
+
+  def check_between(argument, start_char, end_char)
+    if argument[0] == start_char
+      if argument[-1] != end_char
+        fail Clin::Error, "Argument format error! Cannot start with #{start_char} and not end with #{end_char}"
+      end
+      return true
+    end
+    false
   end
 end
