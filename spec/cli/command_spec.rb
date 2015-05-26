@@ -2,10 +2,10 @@ require 'spec_helper'
 require 'clin/command'
 
 RSpec.describe Clin::Command do
+
   describe '#arguments=' do
     subject { Class.new(Clin::Command) }
     let(:args) { %w(fix <var> [opt]) }
-
     before do
       allow(Clin::Argument).to receive(:new)
     end
@@ -76,7 +76,7 @@ RSpec.describe Clin::Command do
     end
     it 'raise error when too much argument' do
       expect { subject.parse_arguments(%w(other val opt more)) }
-        .to raise_error(Clin::CommandLineError)
+          .to raise_error(Clin::CommandLineError)
     end
 
     it 'map arguments' do
@@ -115,5 +115,50 @@ RSpec.describe Clin::Command do
 
     it { expect(subject.parse_options(%w(--echo))).to eq(echo: nil) }
     it { expect(subject.parse_options(%w(-e EchoThis))).to eq(echo: 'EchoThis') }
+  end
+
+  describe '.handle_dispatch' do
+    subject { Class.new(Clin::Command) }
+    let(:args) { [Faker::Lorem.word, Faker::Lorem.word] }
+    before do
+      subject.arguments = %w(remote <args>...)
+    end
+
+    context 'when only dispatching arguments' do
+      before do
+        subject.dispatch :args
+        allow_any_instance_of(Clin::CommandDispatcher).to receive(:parse)
+      end
+      it 'call the command dispatcher with the right arguments' do
+        expect_any_instance_of(Clin::CommandDispatcher).to receive(:parse).once.with(args)
+        subject.handle_dispatch(remote: 'remote', args: args)
+      end
+    end
+
+    context 'when using prefix' do
+      let(:prefix) { 'remote' }
+      before do
+        subject.dispatch :args, prefix: prefix
+        allow_any_instance_of(Clin::CommandDispatcher).to receive(:parse)
+      end
+      it 'call the command dispatcher with the right arguments' do
+        expect_any_instance_of(Clin::CommandDispatcher).to receive(:parse).once.with([prefix] + args)
+        subject.handle_dispatch(remote: 'remote', args: args)
+      end
+    end
+
+    context 'when using commands' do
+      let(:cmd1) { double(:command) }
+      let(:cmd2) { double(:command) }
+      before do
+        subject.dispatch :args, commands: [cmd1, cmd2]
+        allow_any_instance_of(Clin::CommandDispatcher).to receive(:initialize)
+        allow_any_instance_of(Clin::CommandDispatcher).to receive(:parse)
+      end
+      it 'call the command dispatcher with the right arguments' do
+        expect_any_instance_of(Clin::CommandDispatcher).to receive(:initialize).once.with([cmd1, cmd2])
+        subject.handle_dispatch(remote: 'remote', args: args)
+      end
+    end
   end
 end

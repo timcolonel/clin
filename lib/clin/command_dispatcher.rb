@@ -2,24 +2,25 @@ require 'clin'
 require 'clin/command'
 
 # Class charge dispatching the CL to the right command
-# The class can either be used directly and any of the loaded class inheriting
-# from Clin::Command will be tested against.
-# Otherwise you can inherit from this class to filter command
 class Clin::CommandDispatcher
-  class_attribute :cmds
+  attr_accessor :commands
 
-  def self.commands=(commands)
-    self.cmds = commands
+  # Create a new command dispatcher.
+  # @param commands [Array<Clin::Command.class>] List of commands that can be dispatched.
+  #   If commands is nil it will get all the subclass of Clin::Command loaded.
+  def initialize(*commands)
+    @commands = commands.empty? ? Clin::Command.subclasses : commands.flatten
   end
 
-  def self.commands
-    self.cmds ||= Clin::Command.subclasses
-  end
-
-  def self.parse(argv = ARGV)
+  # Parse the command line using the given arguments
+  # It will return the newly initialized command with the arguments if there is a match
+  # Otherwise will fail and display the help message
+  # @param argv [Array<String>] Arguments
+  # @return [Clin::Command]
+  def parse(argv = ARGV)
     errors = 0
     argv = Shellwords.split(argv) if argv.is_a? String
-    commands.each do |cmd|
+    @commands.each do |cmd|
       begin
         return cmd.parse(argv)
       rescue Clin::ArgumentError
@@ -29,7 +30,15 @@ class Clin::CommandDispatcher
     fail Clin::CommandLineError, help_message
   end
 
-  def self.help_message
+  # Helper method to parse against all the commands
+  # @see #parse
+  def self.parse(argv=ARGV)
+    Clin::CommandDispatcher.new.parse(argv)
+  end
+
+  # Generate the help message for this dispatcher
+  # @return [String]
+  def help_message
     message = "Usage:\n"
     commands.each do |command|
       message << "\t#{command.usage}\n"
