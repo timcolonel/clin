@@ -160,5 +160,38 @@ RSpec.describe Clin::Command do
         subject.handle_dispatch(remote: 'remote', args: args)
       end
     end
+
+    context 'when dispatcher raise HelpError' do
+      let(:new_message) { Faker::Lorem.sentence }
+      before do
+        subject.dispatch :args
+        allow_any_instance_of(Clin::CommandDispatcher).to receive(:initialize)
+        allow_any_instance_of(Clin::CommandDispatcher).to receive(:parse) do
+          fail Clin::HelpError, 'Dispatcher error'
+        end
+        allow(subject).to receive(:option_parser).and_return(new_message)
+      end
+      it { expect { subject.handle_dispatch(remote: 'remote', args: args) }.to raise_error(Clin::HelpError) }
+      it { expect { subject.handle_dispatch(remote: 'remote', args: args) }.to raise_error(new_message) }
+    end
+  end
+
+  describe '.dispatch_doc' do
+    subject { Class.new(Clin::Command) }
+    before do
+      subject.arguments(%w(remote <args>...))
+    end
+
+    let(:cmd1) { double(:command, usage: 'cmd1') }
+    let(:cmd2) { double(:command, usage: 'cmd2') }
+    let(:cmd3) { double(:command, usage: 'cmd3') }
+    let(:cmds) { [cmd1, cmd2, cmd3] }
+    let(:opts) { double(:option_parser, separator: true) }
+    before do
+      subject.dispatch :args, commands: cmds
+      allow_any_instance_of(Clin::CommandDispatcher).to receive(:initialize)
+      subject.dispatch_doc(opts)
+    end
+    it { expect(opts).to have_received(:separator).at_least(cmds.size).times }
   end
 end
