@@ -40,6 +40,7 @@ class DisplayCommand < Clin::Command
 end
 ```
 
+#### Specify arguments
 To specify what argument your command takes use the `.arguments` method.
 Clin will then automatically extract the arguments when parsing and pass them when creating the object.
 You can after access the arguments with @params
@@ -54,6 +55,8 @@ end
 ```
 
 Then calling `DisplayCommand.parse('display "Hello World!"').run` will print `Display message: Hello World!`
+
+#### Specify options
 You can also specify options using the `.option` method.
 ```ruby
 class DisplayCommand < Clin::Command
