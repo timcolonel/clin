@@ -32,7 +32,7 @@ RSpec.describe Clin::Option do
     context 'when initializing with name' do
       subject { Clin::Option.new(:my_option, '-m', '--myoption', 'This is my option!') }
       before do
-        subject.extract(opts, out)
+        subject.register(opts, out)
       end
       it { expect(opts).to have_received(:on).once }
       it { expect(out[:my_option]).to eq(value) }
@@ -42,7 +42,7 @@ RSpec.describe Clin::Option do
       let(:block) { proc { |_opts, out, value| out[:some] = value } }
       subject { Clin::Option.new('-m', '--myoption', 'This is my option!', &block) }
       before do
-        subject.extract(opts, out)
+        subject.register(opts, out)
       end
       it { expect(opts).to have_received(:on).once }
       it { expect(out[:some]).to eq(value) }

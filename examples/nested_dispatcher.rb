@@ -3,57 +3,54 @@ require 'clin'
 
 # Simple dispatch Example
 class DispatchCommand < Clin::Command
-  self.arguments = 'you <args>...'
+  arguments 'you <args>...'
   dispatch :args, prefix: 'you'
   general_option Clin::HelpOptions
 
   self.description = 'YOU print the given message'
 
-  def initialize(options)
-    @options = options
-    puts "Lol: '#{options}'"
+  def run
+    puts 'Should not be called'
   end
 end
 
 # Simple command Example
 class DispatchCommand::DisplayCommand < Clin::Command
-  self.arguments = 'you display <message>'
+  arguments 'you display <message>'
 
   general_option Clin::HelpOptions
 
   self.description = 'Display the given message'
 
-  def initialize(options)
-    @options = options
-    puts "I Display: '#{options[:message]}'"
+  def run
+    puts "I Display: '#{params[:message]}'"
   end
 end
 
 # Simple command Example
 class DispatchCommand::PrintCommand < Clin::Command
-  self.arguments = 'you print <message>'
+  arguments  'you print <message>'
 
   general_option Clin::HelpOptions
 
   self.description = 'Print the given message'
 
-  def initialize(options)
-    @options = options
-    puts "I Print: '#{options[:message]}'"
+  def run
+    puts "I Print: '#{params[:message]}'"
   end
 end
 
 
-Clin::CommandDispatcher.parse('you display "My Message"')
+Clin::CommandDispatcher.parse('you display "My Message"').run
 puts
 puts '=' * 60
 puts
-Clin::CommandDispatcher.parse('you print "My Message"')
+Clin::CommandDispatcher.parse('you print "My Message"').run
 puts
 puts '=' * 60
 puts
 begin
-  Clin::CommandDispatcher.parse('you -h')
+  Clin::CommandDispatcher.parse('you -h').run
 rescue Clin::CommandLineError => e
   puts e
 end

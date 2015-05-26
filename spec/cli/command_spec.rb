@@ -11,7 +11,7 @@ RSpec.describe Clin::Command do
     end
     context 'when using string to set arguments' do
       before do
-        subject.arguments = args.join(' ')
+        subject.arguments (args.join(' '))
       end
       it { expect(subject.args.size).to eq(args.size) }
       it { expect(Clin::Argument).to have_received(:new).exactly(args.size).times }
@@ -19,7 +19,7 @@ RSpec.describe Clin::Command do
 
     context 'when using array to set arguments' do
       before do
-        subject.arguments = args
+        subject.arguments (args)
       end
       it { expect(subject.args.size).to eq(args.size) }
       it { expect(Clin::Argument).to have_received(:new).exactly(args.size).times }
@@ -27,7 +27,7 @@ RSpec.describe Clin::Command do
 
     context 'when using array that contains multiple arguments to set arguments' do
       before do
-        subject.arguments = [args[0], args[1..-1]]
+        subject.arguments ([args[0], args[1..-1]])
       end
       it { expect(subject.args.size).to eq(args.size) }
       it { expect(Clin::Argument).to have_received(:new).exactly(args.size).times }
@@ -53,7 +53,7 @@ RSpec.describe Clin::Command do
     context 'when arguments are defined' do
       let(:arguments) { '<some> [Value]' }
       before do
-        subject.arguments = arguments
+        subject.arguments(arguments)
       end
 
       it { expect(subject.banner).to eq("Usage: command #{arguments} [Options]") }
@@ -65,7 +65,7 @@ RSpec.describe Clin::Command do
     let(:args) { %w(fix <var> [opt]) }
 
     before do
-      subject.arguments = args
+      subject.arguments(args)
     end
 
     it 'raise argument when fixed in different' do
@@ -121,7 +121,7 @@ RSpec.describe Clin::Command do
     subject { Class.new(Clin::Command) }
     let(:args) { [Faker::Lorem.word, Faker::Lorem.word] }
     before do
-      subject.arguments = %w(remote <args>...)
+      subject.arguments(%w(remote <args>...))
     end
 
     context 'when only dispatching arguments' do

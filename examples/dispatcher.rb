@@ -3,42 +3,40 @@ require 'clin'
 
 # Simple command Example
 class DisplayCommand < Clin::Command
-  self.arguments = 'display <message>'
+  self.arguments 'display <message>'
 
   general_option Clin::HelpOptions
 
   self.description = 'Display the given message'
 
-  def initialize(options)
-    @options = options
-    puts "Display: '#{options[:message]}'"
+  def run
+    puts "Display: '#{params[:message]}'"
   end
 end
 
 # Simple command Example
 class PrintCommand < Clin::Command
-  self.arguments = 'print <message>'
+  self.arguments 'print <message>'
 
   general_option Clin::HelpOptions
 
   self.description = 'Print the given message'
 
-  def initialize(options)
-    @options = options
-    puts "Print: '#{options[:message]}'"
+  def run
+    puts "Print: '#{params[:message]}'"
   end
 end
 
-Clin::CommandDispatcher.parse('display "My Message"')
+Clin::CommandDispatcher.parse('display "My Message"').run
 puts
 puts '=' * 60
 puts
-Clin::CommandDispatcher.parse('print "My Message"')
+Clin::CommandDispatcher.parse('print "My Message"').run
 puts
 puts '=' * 60
 puts
 begin
-  Clin::CommandDispatcher.parse('display -h')
+  Clin::CommandDispatcher.parse('display -h').run
 rescue Clin::CommandLineError => e
   puts e
 end

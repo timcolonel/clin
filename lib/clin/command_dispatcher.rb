@@ -27,7 +27,7 @@ class Clin::CommandDispatcher
         errors += 1
       end
     end
-    fail Clin::CommandLineError, help_message
+    fail Clin::HelpError, help_message
   end
 
   # Helper method to parse against all the commands

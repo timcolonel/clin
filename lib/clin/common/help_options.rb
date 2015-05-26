@@ -6,12 +6,18 @@
 # end
 # ```
 # Then running you command with -h or --help will show the help menu
-class Clin::HelpOptions < Clin::CommandOptions
+class Clin::HelpOptions < Clin::GeneralOption
   option '-h', '--help', 'Show the help.' do |opts, out, _|
     out[:help] = opts
   end
 
-  def self.execute_options(options)
-    fail Clin::CommandLineError, options[:help] if options[:help]
+  def initialize(raise: true)
+    @raise = raise
+  end
+
+
+  def execute(options)
+    return unless @raise
+    fail Clin::HelpError, options[:help] if options[:help]
   end
 end

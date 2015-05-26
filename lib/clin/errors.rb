@@ -6,6 +6,9 @@ module Clin
   # Error cause by the user input(when parsing command)
   CommandLineError = Class.new(Error)
 
+  # Error when the help needs to be shown
+  HelpError = Class.new(CommandLineError)
+
   # Error when an positional argument is wrong
   ArgumentError = Class.new(CommandLineError)
 

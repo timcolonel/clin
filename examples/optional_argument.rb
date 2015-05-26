@@ -3,11 +3,10 @@ require 'clin'
 
 # Simple command Example
 class OptionalArgumentCommand < Clin::Command
-  self.arguments = 'display [<message>]'
+  arguments 'display [<message>]'
 
-  def initialize(options)
-    @options = options
-    puts options.fetch(:message, 'No message given')
+  def run
+    puts params.fetch(:message, 'No message given')
   end
 end
 

@@ -17,7 +17,10 @@ class Clin::Option
     @block = block
   end
 
-  def extract(opts, out)
+  # Register the option to the Option Parser
+  # @param opts [OptionParser]
+  # @param out [Hash] Out options mapping
+  def register(opts, out)
     if @block.nil?
       opts.on(*args) do |value|
         on(value, out)

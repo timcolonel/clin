@@ -3,17 +3,18 @@ require 'clin/option'
 
 # Template class for reusable options and commands
 # It provide the method to add options to a command
-class Clin::CommandOptions
+class Clin::CommandOptionsMixin
   class_attribute :options
 
   class_attribute :general_options
-
   self.options = []
   self.general_options = []
+
+
   # Add an option
   # @param args list of arguments.
   #   * First argument must be the name if no block is given.
-  #     It will set automaticaly read the value into the hash with  +name+ as key
+  #     It will set automatically read the value into the hash with  +name+ as key
   #   * The remaining arguments are OptionsParser#on arguments
   # ```
   #   option :require, '-r', '--require [LIBRARY]', 'Require the library'
@@ -31,20 +32,24 @@ class Clin::CommandOptions
     self.options += [option]
   end
 
-  def self.general_option(option)
-    self.general_options += [option]
+  # Add a general option
+  # @param option_cls [Class<GeneralOption>] Class inherited from GeneralOption
+  # @param config [Hash] General option config. Check the general option config.
+  def self.general_option(option_cls, config = {})
+    self.general_options += [option_cls.new(config)]
   end
 
   # To be called inside OptionParser block
+  # Extract the option in the command line using the OptionParser and map it to the out map.
   # @param opts [OptionParser]
   # @param out [Hash] Where the options shall be extracted
-  def self.extract_options(opts, out)
+  def self.register_options(opts, out)
     options.each do |option|
-      option.extract(opts, out)
+      option.register(opts, out)
     end
 
     general_options.each do |option|
-      option.extract_options(opts, out)
+      option.class.register_options(opts, out)
     end
   end
 end

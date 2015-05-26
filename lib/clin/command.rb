@@ -1,10 +1,11 @@
 require 'clin'
-require 'clin/command_options'
+require 'clin/command_options_mixin'
 require 'clin/argument'
 require 'shellwords'
 
 # Clin Command
-class Clin::Command < Clin::CommandOptions
+class Clin::Command < Clin::CommandOptionsMixin
+
   class_attribute :exe_name
   class_attribute :args
   class_attribute :description
@@ -14,7 +15,7 @@ class Clin::Command < Clin::CommandOptions
   self.args = []
   self.description = ''
 
-  def self.arguments=(args)
+  def self.arguments(args)
     self.args = []
     [*args].map(&:split).flatten.each do |arg|
       self.args += [Clin::Argument.new(arg)]
@@ -42,35 +43,45 @@ class Clin::Command < Clin::CommandOptions
     rescue Clin::MissingArgumentError => e
       error = e
     end
-    execute_general_options(options_map)
-    fail error unless error.nil?
+    args_map ||= {}
+
     options = options_map.merge(args_map)
     return handle_dispatch(options) unless self.redispatch_args.nil?
-    new(options)
+    obj = new(options)
+    fail error unless error.nil?
+    obj
   end
 
   # Parse the options in the argv.
   # @return [Array] the list of argv that are not options(positional arguments)
   def self.parse_options(argv)
     out = {}
-    parser = OptionParser.new do |opts|
+    parser = option_parser(out)
+    parser.parse!(argv)
+    out
+  end
+
+  # Build the Option Parser object
+  # Used to parse the option
+  # Useful for regenerating the help as well.
+  def self.option_parser(out = {})
+    OptionParser.new do |opts|
       opts.banner = banner
       opts.separator ''
       opts.separator 'Options:'
-      extract_options(opts, out)
+      register_options(opts, out)
+      dispatch_doc(opts)
       unless description.blank?
         opts.separator "\nDescription:"
         opts.separator description
       end
       opts.separator ''
     end
-    parser.parse!(argv)
-    out
   end
 
   def self.execute_general_options(options)
     general_options.each do |gopts|
-      gopts.execute_options(options)
+      gopts.execute(options)
     end
   end
 
@@ -100,11 +111,34 @@ class Clin::Command < Clin::CommandOptions
   # @param params [List<String>] Parsed params from the command line.
   def self.handle_dispatch(params)
     args, prefix, commands = self.redispatch_args
-    # If no commands are specified it will get the command that are in the class namespace
-    commands ||= self.constants.map { |c| self.const_get(c) }.select { |c| c.is_a?(Class) && (c < Clin::Command) }
+    commands ||= default_commands
     dispatcher = Clin::CommandDispatcher.new(commands)
     args = args.map { |x| params[x] }.flatten
     args = prefix.split + args unless prefix.nil?
-    dispatcher.parse(args)
+    begin
+      dispatcher.parse(args)
+    rescue Clin::HelpError
+      raise Clin::HelpError, option_parser
+    end
+  end
+
+  def self.dispatch_doc(opts)
+    return if self.redispatch_args.nil?
+    opts.separator 'Examples: '
+    commands = (self.redispatch_args[2] || default_commands)
+    commands.each do |cmd_cls|
+      opts.separator "\t#{cmd_cls.usage}"
+    end
+  end
+
+  def self.default_commands
+    self.constants.map { |c| self.const_get(c) }.select { |c| c.is_a?(Class) && (c < Clin::Command) }
+  end
+
+  attr_accessor :params
+
+  def initialize(params)
+    @params = params
+    self.class.execute_general_options(params)
   end
 end
