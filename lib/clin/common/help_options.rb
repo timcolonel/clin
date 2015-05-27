@@ -7,7 +7,7 @@
 # ```
 # Then running you command with -h or --help will show the help menu
 class Clin::HelpOptions < Clin::GeneralOption
-  option '-h', '--help', 'Show the help.' do |opts, out, _|
+  flag_option :help, 'Show the help.' do |opts, out, _|
     out[:help] = opts
   end
 

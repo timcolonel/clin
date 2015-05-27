@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'clin/command'
 
 RSpec.describe Clin::Command do
-
   describe '#arguments=' do
     subject { Class.new(Clin::Command) }
     let(:args) { %w(fix <var> [opt]) }
@@ -90,9 +89,9 @@ RSpec.describe Clin::Command do
 
   describe '#parse_options' do
     subject { Class.new(Clin::Command) }
-    let(:opt1) { Clin::Option.new(:name, '-n', '--name Name', 'Set name') }
-    let(:opt2) { Clin::Option.new(:verbose, '-v', '--verbose', 'Set verbose') }
-    let(:opt3) { Clin::Option.new(:echo, '-e', '--echo [ECHO]', 'Set name') }
+    let(:opt1) { Clin::Option.new(:name, 'Set name') }
+    let(:opt2) { Clin::Option.new(:verbose, 'Set verbose', argument: false) }
+    let(:opt3) { Clin::Option.new(:echo, 'Set name', optional_argument: true) }
     before do
       subject.add_option opt1
       subject.add_option opt2

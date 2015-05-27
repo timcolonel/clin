@@ -23,8 +23,34 @@ class Clin::CommandOptionsMixin
   #     exit
   #   end
   # ```
-  def self.option(*args, &block)
+  def self.opt_option(*args, &block)
     add_option Clin::Option.new(*args, &block)
+  end
+
+  # Add an option.
+  # Helper method that just create a new Clin::Option with the argument then call add_option
+  # ```
+  #   option :show, 'Show some message'
+  #   # => -s --show              SHOW Show some message
+  #   option :require, 'Require a library', short: false, optional: true, argument: 'LIBRARY'
+  #   # => --require [LIBRARY]    Require a library
+  #   option :help, 'Show the help', argument: false do
+  #     puts opts
+  #     exit
+  #   end
+  #   # => -h --help              Show the help
+  # ```
+  def self.option(name, description, **config, &block)
+    add_option Clin::Option.new(name, description, **config, &block)
+  end
+
+  # For an option that does not have an argument
+  # Same as .option except it will default argument to false
+  # ```
+  #   option :verbose, 'Use verbose' #=> -v --verbose will be added to the option of this command
+  # ```
+  def self.flag_option(name, description, **config, &block)
+    add_option Clin::Option.new(name, description, **config.merge(argument: false), &block)
   end
 
   def self.add_option(option)

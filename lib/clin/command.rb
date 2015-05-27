@@ -33,7 +33,7 @@ class Clin::Command < Clin::CommandOptionsMixin
 
   # Parse the command and initialize the command object with the parsed options
   # @param argv [Array|String] command line to parse.
-  def self.parse(argv = ARGV)
+  def self.parse(argv = ARGV, raise_fixed: false)
     argv = Shellwords.split(argv) if argv.is_a? String
     argv = argv.clone
     options_map = parse_options(argv)
@@ -41,6 +41,9 @@ class Clin::Command < Clin::CommandOptionsMixin
     begin
       args_map = parse_arguments(argv)
     rescue Clin::MissingArgumentError => e
+      error = e
+    rescue Clin::FixedArgumentError => e
+      raise e if raise_fixed
       error = e
     end
     args_map ||= {}

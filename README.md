@@ -61,7 +61,7 @@ You can also specify options using the `.option` method.
 ```ruby
 class DisplayCommand < Clin::Command
   arguments 'display <message>'
-  option :times, '-t', '--times TIMES', 'Display the message n times'
+  option :times, 'Display the message n times'
   
   def run
     params[:times] ||= 1

@@ -3,7 +3,7 @@ require 'clin'
 
 # Simple command Example
 class DisplayCommand < Clin::Command
-  self.arguments 'display <message>'
+  arguments 'display <message>'
 
   general_option Clin::HelpOptions
 
@@ -16,7 +16,7 @@ end
 
 # Simple command Example
 class PrintCommand < Clin::Command
-  self.arguments 'print <message>'
+  arguments 'print <message>'
 
   general_option Clin::HelpOptions
 

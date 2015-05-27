@@ -4,9 +4,9 @@ require 'clin'
 
 # Simple command Example
 class SimpleCommand < Clin::Command
-  arguments  'display <message>'
+  arguments 'display <message>'
 
-  option :echo, '-e', '--echo ECHO', 'Echo some text'
+  option :echo, 'Echo some text'
   general_option Clin::HelpOptions
 
   def run
@@ -19,8 +19,11 @@ SimpleCommand.parse('display "My Message" --echo SOME').run
 puts
 puts '=' * 60
 puts
-SimpleCommand.parse('-h').run
-
+begin
+  SimpleCommand.parse('-h').run
+rescue Clin::HelpError => e
+  puts e
+end
 # $ ruby simple.rb
 # My Message
 # SOME
