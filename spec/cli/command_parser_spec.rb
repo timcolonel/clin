@@ -114,7 +114,7 @@ RSpec.describe Clin::CommandParser do
       end
       it 'call the command dispatcher with the right arguments' do
         expect_any_instance_of(Clin::CommandDispatcher).to receive(:parse).once.with(args)
-        subject.handle_dispatch(remote: 'remote', args: args)
+        subject.redispatch(remote: 'remote', args: args)
       end
     end
 
@@ -125,7 +125,7 @@ RSpec.describe Clin::CommandParser do
       end
       it 'call the command dispatcher with the right arguments' do
         expect_any_instance_of(Clin::CommandDispatcher).to receive(:parse).once.with([prefix] + args)
-        subject.handle_dispatch(remote: 'remote', args: args)
+        subject.redispatch(remote: 'remote', args: args)
       end
     end
 
@@ -138,7 +138,7 @@ RSpec.describe Clin::CommandParser do
       end
       it 'call the command dispatcher with the right arguments' do
         expect_any_instance_of(Clin::CommandDispatcher).to receive(:initialize).once.with([cmd1, cmd2])
-        subject.handle_dispatch(remote: 'remote', args: args)
+        subject.redispatch(remote: 'remote', args: args)
       end
     end
 
@@ -153,11 +153,11 @@ RSpec.describe Clin::CommandParser do
         allow(@command).to receive(:option_parser).and_return(new_message)
       end
       it do
-        expect { subject.handle_dispatch(remote: 'remote', args: args) }
+        expect { subject.redispatch(remote: 'remote', args: args) }
           .to raise_error(Clin::HelpError)
       end
       it do
-        expect { subject.handle_dispatch(remote: 'remote', args: args) }
+        expect { subject.redispatch(remote: 'remote', args: args) }
           .to raise_error(new_message)
       end
     end

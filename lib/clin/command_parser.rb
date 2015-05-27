@@ -17,21 +17,20 @@ class Clin::CommandParser
   def parse
     argv = @argv.clone
     error = nil
+    options = {}
     begin
-      options_map = parse_options(argv)
+      options.merge! parse_options(argv)
     rescue Clin::OptionError => e
       error = e
     end
     begin
-      args_map = parse_arguments(argv)
+      options.merge! parse_arguments(argv)
     rescue Clin::ArgumentError => e
       raise e unless @fallback_help
       error = e
     end
-    args_map ||= {}
 
-    options = options_map.merge(args_map)
-    return handle_dispatch(options) if @command.redispatch?
+    return redispatch(options) if @command.redispatch?
     obj = @command.new(options)
     handle_error(error)
     obj
@@ -85,7 +84,7 @@ class Clin::CommandParser
 
   # Method called after the argument have been parsed and before creating the command
   # @param params [Array<String>] Parsed params from the command line.
-  def handle_dispatch(params)
+  def redispatch(params)
     commands = @command._redispatch_args.last
     commands ||= @command.default_commands
     dispatcher = Clin::CommandDispatcher.new(commands)
@@ -105,8 +104,6 @@ class Clin::CommandParser
     args += params[:skipped_options] if @command.skip_options?
     args
   end
-
-  protected
 
   def handle_error(error)
     return unless error

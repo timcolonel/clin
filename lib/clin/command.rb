@@ -132,7 +132,8 @@ class Clin::Command < Clin::CommandOptionsMixin
   end
 
   def self.default_commands
-    # self.constants.map { |c| self.const_get(c) }.select { |c| c.is_a?(Class) && (c < Clin::Command) }
+    # self.constants.map { |c| self.const_get(c) }
+    # .select { |c| c.is_a?(Class) && (c < Clin::Command) }
     subcommands
   end
 
