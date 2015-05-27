@@ -59,7 +59,7 @@ class Clin::Argument
   def ensure_name(args)
     [*args].each do |arg|
       if arg != @name
-        fail Clin::FixedArgumentError, "Error expecting argument '#{arg}' to be '#{@name}'"
+        fail Clin::FixedArgumentError, @name, arg
       end
     end
   end

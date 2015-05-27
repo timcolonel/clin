@@ -2,6 +2,7 @@ require 'clin'
 require 'clin/command_options_mixin'
 require 'clin/argument'
 require 'shellwords'
+require 'clin/common/help_options'
 
 # Clin Command
 class Clin::Command < Clin::CommandOptionsMixin
@@ -18,6 +19,7 @@ class Clin::Command < Clin::CommandOptionsMixin
   self.args = []
   self.description = ''
   self._abstract = false
+
 
   # Trigger when a class inherit this class
   # Rest class_attributes that should not be shared with subclass
@@ -67,7 +69,7 @@ class Clin::Command < Clin::CommandOptionsMixin
 
   # Parse the command and initialize the command object with the parsed options
   # @param argv [Array|String] command line to parse.
-  def self.parse(argv = ARGV, raise_fixed: false)
+  def self.parse(argv = ARGV, fallback_help: true)
     argv = Shellwords.split(argv) if argv.is_a? String
     argv = argv.clone
     options_map = parse_options(argv)
@@ -77,7 +79,7 @@ class Clin::Command < Clin::CommandOptionsMixin
     rescue Clin::MissingArgumentError => e
       error = e
     rescue Clin::FixedArgumentError => e
-      raise e if raise_fixed
+      raise e unless fallback_help
       error = e
     end
     args_map ||= {}
@@ -85,7 +87,10 @@ class Clin::Command < Clin::CommandOptionsMixin
     options = options_map.merge(args_map)
     return handle_dispatch(options) unless self._redispatch_args.nil?
     obj = new(options)
-    fail error unless error.nil?
+    if error
+      fail Clin::HelpError, option_parser if fallback_help
+      fail error
+    end
     obj
   end
 
@@ -117,7 +122,7 @@ class Clin::Command < Clin::CommandOptionsMixin
   end
 
   def self.execute_general_options(options)
-    general_options.each do |gopts|
+    general_options.each do |_cls, gopts|
       gopts.execute(options)
     end
   end
@@ -178,6 +183,8 @@ class Clin::Command < Clin::CommandOptionsMixin
   def self.subcommands
     self.subclasses.reject(&:_abstract)
   end
+
+  general_option 'Clin::HelpOptions'
 
   attr_accessor :params
 

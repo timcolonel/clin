@@ -36,7 +36,7 @@ RSpec.describe Clin::CommandOptionsMixin do
     end
     it { expect(option).to have_received(:new) }
     it { expect(subject.general_options.size).to be 1 }
-    it { expect(subject.general_options.first).to eq(true) }
+    it { expect(subject.general_options.values.first).to eq(true) }
     it { expect(Clin::CommandOptionsMixin.general_options.size).to be 0 }
   end
 
@@ -51,7 +51,7 @@ RSpec.describe Clin::CommandOptionsMixin do
     before do
       subject.add_option(opt1)
       subject.add_option(opt2)
-      subject.general_options = [g_opt]
+      subject.general_options = {g_opt_cls => g_opt}
 
       subject.register_options(opts, out)
     end

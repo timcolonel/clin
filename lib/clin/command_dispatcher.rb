@@ -22,7 +22,7 @@ class Clin::CommandDispatcher
     argv = Shellwords.split(argv) if argv.is_a? String
     @commands.each do |cmd|
       begin
-        return cmd.parse(argv, raise_fixed: true)
+        return cmd.parse(argv, fallback_help: false)
       rescue Clin::ArgumentError
         errors += 1
       end

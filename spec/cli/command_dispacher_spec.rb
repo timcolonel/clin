@@ -51,7 +51,7 @@ RSpec.describe Clin::CommandDispatcher do
       before do
         subject.parse(args)
       end
-      it { expect(cmd1).to have_received(:parse).with(args, raise_fixed: true) }
+      it { expect(cmd1).to have_received(:parse).with(args, fallback_help: false) }
       it { expect(subject.parse).to eq('cmd1') }
     end
 
@@ -60,8 +60,8 @@ RSpec.describe Clin::CommandDispatcher do
         allow(cmd1).to receive(:parse) { fail Clin::FixedArgumentError, :some }
         subject.parse(args)
       end
-      it { expect(cmd1).to have_received(:parse).with(args, raise_fixed: true) }
-      it { expect(cmd2).to have_received(:parse).with(args, raise_fixed: true) }
+      it { expect(cmd1).to have_received(:parse).with(args, fallback_help: false) }
+      it { expect(cmd2).to have_received(:parse).with(args, fallback_help: false) }
       it { expect(subject.parse).to eq('cmd2') }
     end
 
@@ -76,8 +76,8 @@ RSpec.describe Clin::CommandDispatcher do
         end
       end
       it { expect { subject.parse }.to raise_error(Clin::CommandLineError) }
-      it { expect(cmd1).to have_received(:parse).with(args, raise_fixed: true) }
-      it { expect(cmd2).to have_received(:parse).with(args, raise_fixed: true) }
+      it { expect(cmd1).to have_received(:parse).with(args, fallback_help: false) }
+      it { expect(cmd2).to have_received(:parse).with(args, fallback_help: false) }
       it { expect(@error.to_s).to eq(subject.help_message) }
     end
   end

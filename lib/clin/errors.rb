@@ -13,7 +13,11 @@ module Clin
   ArgumentError = Class.new(CommandLineError)
 
   # Error when a fixed argument is not matched
-  FixedArgumentError = Class.new(ArgumentError)
+  class FixedArgumentError < ArgumentError
+    def initialize(argument = '', got = '')
+      super("Expecting '#{argument}' but got '#{got}'")
+    end
+  end
 
   # Error when a command is missing an argument
   class MissingArgumentError < ArgumentError

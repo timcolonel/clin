@@ -15,14 +15,16 @@ class SimpleCommand < Clin::Command
   end
 end
 
-SimpleCommand.parse('display "My Message" --echo SOME').run
-puts
-puts '=' * 60
-puts
-begin
-  SimpleCommand.parse('-h').run
-rescue Clin::HelpError => e
-  puts e
+if __FILE__== $0
+  SimpleCommand.parse('display "My Message" --echo SOME').run
+  puts
+  puts '=' * 60
+  puts
+  begin
+    SimpleCommand.parse('').run
+  rescue Clin::HelpError => e
+    puts e
+  end
 end
 # $ ruby simple.rb
 # My Message
