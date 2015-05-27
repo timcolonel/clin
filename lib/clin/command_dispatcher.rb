@@ -9,7 +9,7 @@ class Clin::CommandDispatcher
   # @param commands [Array<Clin::Command.class>] List of commands that can be dispatched.
   #   If commands is nil it will get all the subclass of Clin::Command loaded.
   def initialize(*commands)
-    @commands = commands.empty? ? Clin::Command.subclasses : commands.flatten
+    @commands = commands.empty? ? Clin::Command.subcommands : commands.flatten
   end
 
   # Parse the command line using the given arguments

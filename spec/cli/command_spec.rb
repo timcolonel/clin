@@ -39,7 +39,7 @@ RSpec.describe Clin::Command do
     context 'when exe is defined' do
       let(:exe) { Faker::Lorem.word }
       before do
-        subject.exe_name = exe
+        subject.exe_name(exe)
       end
 
       it { expect(subject.banner).to eq("Usage: #{exe} [Options]") }
@@ -55,7 +55,7 @@ RSpec.describe Clin::Command do
         subject.arguments(arguments)
       end
 
-      it { expect(subject.banner).to eq("Usage: command #{arguments} [Options]") }
+      it { expect(subject.banner).to eq("Usage: #{Clin.default_exe_name} #{arguments} [Options]") }
     end
   end
 
@@ -192,5 +192,34 @@ RSpec.describe Clin::Command do
       subject.dispatch_doc(opts)
     end
     it { expect(opts).to have_received(:separator).at_least(cmds.size).times }
+  end
+
+  describe '.subcommands' do
+    before do
+      @cmd1 = Class.new(Clin::Command)
+      @cmd2 = Class.new(Clin::Command)
+      @abstract_cmd = Class.new(Clin::Command) { abstract true }
+    end
+
+    it { expect(Clin::Command.subcommands).to include(@cmd1) }
+    it { expect(Clin::Command.subcommands).to include(@cmd2) }
+    it { expect(Clin::Command.subcommands).not_to include(@abstract_cmd) }
+  end
+
+  describe '.exe_name' do
+    context 'when not setting the exe_name' do
+      subject { Class.new(Clin::Command) }
+
+      it { expect(subject.exe_name).to eq(Clin.exe_name) }
+    end
+
+    context 'when setting the exe_name' do
+      let(:name) { Faker::Lorem.word }
+      subject { Class.new(Clin::Command) }
+      before do
+        subject.exe_name(name)
+      end
+      it { expect(subject.exe_name).to eq(name) }
+    end
   end
 end

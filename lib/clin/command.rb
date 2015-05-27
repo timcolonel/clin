@@ -6,21 +6,47 @@ require 'shellwords'
 # Clin Command
 class Clin::Command < Clin::CommandOptionsMixin
 
-  class_attribute :exe_name
   class_attribute :args
   class_attribute :description
 
 
   # Redispatch will be reset to nil when inheriting a dispatcher command
-  class_attribute :redispatch_args
+  class_attribute :_redispatch_args
+  class_attribute :_abstract
+  class_attribute :_exe_name
 
-  self.exe_name = 'command'
   self.args = []
   self.description = ''
+  self._abstract = false
 
+  # Trigger when a class inherit this class
+  # Rest class_attributes that should not be shared with subclass
+  # @param subclass [Clin::Command]
   def self.inherited(subclass)
-    subclass.redispatch_args = nil
+    subclass._redispatch_args = nil
+    subclass._abstract = false
     super
+  end
+
+  # Mark the class as abstract
+  def self.abstract(value)
+    self._abstract = value
+  end
+
+  # Set or get the exe name.
+  # Executable name that will be display in the usage.
+  # If exe_name is not set in a class or it's parent it will use the global setting Clin.exe_name
+  # @param value [String] name of the exe.
+  # ```
+  # class Git < Clin::Command
+  #   exe_name 'git'
+  #   arguments '<command> <args>...'
+  # end
+  # Git.usage # => git <command> <args>...
+  # ```
+  def self.exe_name(value=nil)
+    self._exe_name = value unless value.nil?
+    self._exe_name ||= Clin.exe_name
   end
 
   def self.arguments(args)
@@ -57,7 +83,7 @@ class Clin::Command < Clin::CommandOptionsMixin
     args_map ||= {}
 
     options = options_map.merge(args_map)
-    return handle_dispatch(options) unless self.redispatch_args.nil?
+    return handle_dispatch(options) unless self._redispatch_args.nil?
     obj = new(options)
     fail error unless error.nil?
     obj
@@ -115,13 +141,13 @@ class Clin::Command < Clin::CommandOptionsMixin
   # `MyDispatcher < Clin::Command` and `MyDispatcher::ChildCommand < Clin::Command`
   # Will test against ChildCommand
   def self.dispatch(args, prefix: nil, commands: nil)
-    self.redispatch_args = [[*args], prefix, commands]
+    self._redispatch_args = [[*args], prefix, commands]
   end
 
   # Method called after the argument have been parsed and before creating the command
   # @param params [List<String>] Parsed params from the command line.
   def self.handle_dispatch(params)
-    args, prefix, commands = self.redispatch_args
+    args, prefix, commands = self._redispatch_args
     commands ||= default_commands
     dispatcher = Clin::CommandDispatcher.new(commands)
     args = args.map { |x| params[x] }.flatten
@@ -134,9 +160,9 @@ class Clin::Command < Clin::CommandOptionsMixin
   end
 
   def self.dispatch_doc(opts)
-    return if self.redispatch_args.nil?
+    return if self._redispatch_args.nil?
     opts.separator 'Examples: '
-    commands = (self.redispatch_args[2] || default_commands)
+    commands = (self._redispatch_args[2] || default_commands)
     commands.each do |cmd_cls|
       opts.separator "\t#{cmd_cls.usage}"
     end
@@ -144,7 +170,13 @@ class Clin::Command < Clin::CommandOptionsMixin
 
   def self.default_commands
     # self.constants.map { |c| self.const_get(c) }.select { |c| c.is_a?(Class) && (c < Clin::Command) }
-    self.subclasses
+    self.subcommands
+  end
+
+  # List the subcommands
+  # The subcommands are all the Classes inheriting this one that are not set to abstract
+  def self.subcommands
+    self.subclasses.reject(&:_abstract)
   end
 
   attr_accessor :params
