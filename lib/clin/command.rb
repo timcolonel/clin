@@ -9,11 +9,19 @@ class Clin::Command < Clin::CommandOptionsMixin
   class_attribute :exe_name
   class_attribute :args
   class_attribute :description
+
+
+  # Redispatch will be reset to nil when inheriting a dispatcher command
   class_attribute :redispatch_args
 
   self.exe_name = 'command'
   self.args = []
   self.description = ''
+
+  def self.inherited(subclass)
+    subclass.redispatch_args = nil
+    super
+  end
 
   def self.arguments(args)
     self.args = []
@@ -135,7 +143,8 @@ class Clin::Command < Clin::CommandOptionsMixin
   end
 
   def self.default_commands
-    self.constants.map { |c| self.const_get(c) }.select { |c| c.is_a?(Class) && (c < Clin::Command) }
+    # self.constants.map { |c| self.const_get(c) }.select { |c| c.is_a?(Class) && (c < Clin::Command) }
+    self.subclasses
   end
 
   attr_accessor :params

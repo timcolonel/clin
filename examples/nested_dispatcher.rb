@@ -15,7 +15,7 @@ class DispatchCommand < Clin::Command
 end
 
 # Simple command Example
-class DispatchCommand::DisplayCommand < Clin::Command
+class DisplayCommand < DispatchCommand
   arguments 'you display <message>'
 
   general_option Clin::HelpOptions
@@ -28,8 +28,8 @@ class DispatchCommand::DisplayCommand < Clin::Command
 end
 
 # Simple command Example
-class DispatchCommand::PrintCommand < Clin::Command
-  arguments  'you print <message>'
+class PrintCommand < DispatchCommand
+  arguments 'you print <message>'
 
   general_option Clin::HelpOptions
 
