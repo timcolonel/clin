@@ -15,7 +15,7 @@ class SimpleCommand < Clin::Command
   end
 end
 
-if __FILE__== $0
+if __FILE__ == $PROGRAM_NAME
   SimpleCommand.parse('display "My Message" --echo SOME').run
   puts
   puts '=' * 60

@@ -5,7 +5,6 @@ require 'clin'
 class DisplayCommand < Clin::Command
   arguments 'display <message>'
 
-
   self.description = 'Display the given message'
 
   def run
@@ -24,7 +23,7 @@ class PrintCommand < Clin::Command
   end
 end
 
-if __FILE__== $0
+if __FILE__ == $PROGRAM_NAME
   Clin::CommandDispatcher.parse('display "My Message"').run
   puts
   puts '=' * 60

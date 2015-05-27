@@ -32,7 +32,7 @@ class Clin::CommandDispatcher
 
   # Helper method to parse against all the commands
   # @see #parse
-  def self.parse(argv=ARGV)
+  def self.parse(argv = ARGV)
     Clin::CommandDispatcher.new.parse(argv)
   end
 

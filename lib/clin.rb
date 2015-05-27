@@ -5,23 +5,23 @@ require 'clin/version'
 
 # Clin Global module. All classes and clin modules should be inside this module
 module Clin
-  def self.default_exe_name
-    'command'
-  end
+  class << self
+    attr_writer :exe_name
 
-  # Global exe_name
-  # If this is not override it will be 'command'
-  def self.exe_name
-    @exe_name ||= Clin.default_exe_name
-  end
+    def default_exe_name
+      'command'
+    end
 
-  # Set the global exe name
-  def self.exe_name=(value)
-    @exe_name=value
+    # Global exe_name
+    # If this is not override it will be 'command'
+    def exe_name
+      @exe_name ||= Clin.default_exe_name
+    end
   end
 end
 
 require 'clin/command'
+require 'clin/command_parser'
 require 'clin/command_options_mixin'
 require 'clin/general_option'
 require 'clin/command_dispatcher'

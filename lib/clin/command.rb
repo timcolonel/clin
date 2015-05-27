@@ -6,10 +6,8 @@ require 'clin/common/help_options'
 
 # Clin Command
 class Clin::Command < Clin::CommandOptionsMixin
-
   class_attribute :args
   class_attribute :description
-
 
   # Redispatch will be reset to nil when inheriting a dispatcher command
   class_attribute :_redispatch_args
@@ -21,7 +19,6 @@ class Clin::Command < Clin::CommandOptionsMixin
   self.description = ''
   self._abstract = false
   self._skip_options = false
-
 
   # Trigger when a class inherit this class
   # Rest class_attributes that should not be shared with subclass
@@ -49,7 +46,7 @@ class Clin::Command < Clin::CommandOptionsMixin
   # end
   # Git.usage # => git <command> <args>...
   # ```
-  def self.exe_name(value=nil)
+  def self.exe_name(value = nil)
     self._exe_name = value unless value.nil?
     self._exe_name ||= Clin.exe_name
   end
@@ -59,7 +56,11 @@ class Clin::Command < Clin::CommandOptionsMixin
   end
 
   def self.skip_options?
-    self._skip_options
+    _skip_options
+  end
+
+  def self.redispatch?
+    !_redispatch_args.nil?
   end
 
   def self.arguments(args)
@@ -81,69 +82,8 @@ class Clin::Command < Clin::CommandOptionsMixin
   # Parse the command and initialize the command object with the parsed options
   # @param argv [Array|String] command line to parse.
   def self.parse(argv = ARGV, fallback_help: true)
-    argv = Shellwords.split(argv) if argv.is_a? String
-    original_argv = argv
-    argv = argv.clone
-    options_map = parse_options(argv)
-    error = nil
-    begin
-      args_map = parse_arguments(argv)
-    rescue Clin::MissingArgumentError => e
-      error = e
-    rescue Clin::FixedArgumentError => e
-      raise e unless fallback_help
-      error = e
-    end
-    args_map ||= {}
-
-    options = options_map.merge(args_map)
-    return handle_dispatch(options, original_argv) unless self._redispatch_args.nil?
-    obj = new(options)
-    if error
-      fail Clin::HelpError, option_parser if fallback_help
-      fail error
-    end
-    obj
-  end
-
-  # Parse the options in the argv.
-  # @return [Array] the list of argv that are not options(positional arguments)
-  def self.parse_options(argv)
-    out = {}
-    parser = option_parser(out)
-    # options_first!(argv) if _skip_options
-    skipped = skipped_options(argv)
-    argv.reject! { |x| skipped.include?(x) }
-    begin
-      parser.parse!(argv)
-    rescue OptionParser::InvalidOption => e
-      fail Clin::OptionError, e.to_s
-    end
-    out[:skipped_options] = skipped if skip_options?
-    out
-  end
-
-  # Get the options that have been skipped by options_first!
-  def self.skipped_options(argv)
-    argv = argv.dup
-    skipped = []
-    parser = option_parser
-    while true
-      begin
-        parser.parse!(argv)
-        break
-      rescue OptionParser::InvalidOption => e
-        if skip_options?
-          skipped << e.to_s.sub(/invalid option:\s+/, '')
-          unless argv.empty? or argv.first.start_with?('-')
-            skipped << argv.shift
-          end
-        else
-          fail Clin::OptionError, e.to_s
-        end
-      end
-    end
-    skipped
+    parser = Clin::CommandParser.new(self, argv, fallback_help: fallback_help)
+    parser.parse
   end
 
   # Build the Option Parser object
@@ -170,16 +110,6 @@ class Clin::Command < Clin::CommandOptionsMixin
     end
   end
 
-  # Parse the argument. The options must have been strip out first.
-  def self.parse_arguments(argv)
-    out = {}
-    self.args.each do |arg|
-      value, argv = arg.parse(argv)
-      out[arg.name.to_sym] = value
-    end
-    out.delete_if { |_, v| v.nil? }
-  end
-
   # Redispatch the command to a sub command with the given arguments
   # @param args [Array<String>|String] New argument to parse
   # @param prefix [String] Prefix to add to the beginning of the command
@@ -192,27 +122,10 @@ class Clin::Command < Clin::CommandOptionsMixin
     self._redispatch_args = [[*args], prefix, commands]
   end
 
-  # Method called after the argument have been parsed and before creating the command
-  # @param params [Array<String>] Parsed params from the command line.
-  # @param argv [Array<String>] Original arguments. Needed if options were skipped.
-  def self.handle_dispatch(params, argv =[])
-    args, prefix, commands = self._redispatch_args
-    commands ||= default_commands
-    dispatcher = Clin::CommandDispatcher.new(commands)
-    args = args.map { |x| params[x] }.flatten.compact
-    args = prefix.split + args unless prefix.nil?
-    args += params[:skipped_options] if skip_options?
-    begin
-      dispatcher.parse(args)
-    rescue Clin::HelpError
-      raise Clin::HelpError, option_parser
-    end
-  end
-
   def self.dispatch_doc(opts)
-    return if self._redispatch_args.nil?
+    return if _redispatch_args.nil?
     opts.separator 'Examples: '
-    commands = (self._redispatch_args[2] || default_commands)
+    commands = (_redispatch_args[2] || default_commands)
     commands.each do |cmd_cls|
       opts.separator "\t#{cmd_cls.usage}"
     end
@@ -220,20 +133,20 @@ class Clin::Command < Clin::CommandOptionsMixin
 
   def self.default_commands
     # self.constants.map { |c| self.const_get(c) }.select { |c| c.is_a?(Class) && (c < Clin::Command) }
-    self.subcommands
+    subcommands
   end
 
   # List the subcommands
   # The subcommands are all the Classes inheriting this one that are not set to abstract
   def self.subcommands
-    self.subclasses.reject(&:_abstract)
+    subclasses.reject(&:_abstract)
   end
 
   general_option 'Clin::HelpOptions'
 
   attr_accessor :params
 
-  def initialize(params={})
+  def initialize(params = {})
     @params = params
     self.class.execute_general_options(params)
   end

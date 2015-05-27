@@ -58,9 +58,8 @@ class Clin::Argument
 
   def ensure_name(args)
     [*args].each do |arg|
-      if arg != @name
-        fail Clin::FixedArgumentError, @name, arg
-      end
+      next if arg == @name
+      fail Clin::FixedArgumentError, @name, arg
     end
   end
 
@@ -81,7 +80,8 @@ class Clin::Argument
   def check_between(argument, start_char, end_char)
     if argument[0] == start_char
       if argument[-1] != end_char
-        fail Clin::Error, "Argument format error! Cannot start with #{start_char} and not end with #{end_char}"
+        fail Clin::Error, "Argument format error! Cannot start
+                            with #{start_char} and not end with #{end_char}"
       end
       return true
     end

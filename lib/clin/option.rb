@@ -5,7 +5,8 @@ class Clin::Option
   attr_accessor :name, :description, :optional_argument, :block, :type
   attr_reader :short, :long, :argument
 
-  def initialize(name, description, short: nil, long: nil, argument: nil, optional_argument: false, type: nil, &block)
+  def initialize(name, description, short: nil, long: nil,
+                 argument: nil, optional_argument: false, type: nil, &block)
     @name = name
     @description = description
     @short = short
@@ -48,7 +49,7 @@ class Clin::Option
   # If @short is false it will return nil
   # @return [String]
   def short
-    return nil if @short === false
+    return nil if @short.eql? false
     @short ||= default_short
   end
 
@@ -57,7 +58,7 @@ class Clin::Option
   # If @long is false it will return nil
   # @return [String]
   def long
-    return nil if @long === false
+    return nil if @long.eql? false
     @long ||= default_long
   end
 
@@ -66,7 +67,7 @@ class Clin::Option
   # If @argument is false it will return nil
   # @return [String]
   def argument
-    return nil if @argument === false
+    return nil if @argument.eql? false
     @argument ||= default_argument
   end
 
@@ -81,16 +82,15 @@ class Clin::Option
 
   def ==(other)
     return false unless other.is_a? Clin::Option
-    @name == other.name &&
-        @description == other.description &&
-        short == other.short &&
-        long == other.long &&
-        argument == other.argument &&
-        @optional_argument == other.optional_argument &&
-        @block == other.block
+    to_a == other.to_a
+  end
+
+  def to_a
+    [@name, @description, @type, short, long, argument, @optional_argument, @block]
   end
 
   protected
+
   def long_argument
     return nil unless long
     out = long

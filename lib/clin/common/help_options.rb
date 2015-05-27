@@ -17,7 +17,6 @@ class Clin::HelpOptions < Clin::GeneralOption
     @raise = raise
   end
 
-
   def execute(options)
     return unless @raise
     fail Clin::HelpError, options[:help] if options[:help]

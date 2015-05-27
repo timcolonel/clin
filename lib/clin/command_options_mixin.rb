@@ -9,7 +9,6 @@ class Clin::CommandOptionsMixin
   self.options = []
   self.general_options = {}
 
-
   # Add an option
   # @param args list of arguments.
   #   * First argument must be the name if no block is given.
@@ -62,14 +61,14 @@ class Clin::CommandOptionsMixin
   # @param config [Hash] General option config. Check the general option config.
   def self.general_option(option_cls, config = {})
     option_cls = option_cls.constantize if option_cls.is_a? String
-    self.general_options = self.general_options.merge(option_cls => option_cls.new(config))
+    self.general_options = general_options.merge(option_cls => option_cls.new(config))
   end
 
   # Remove a general option
   # Might be useful if a parent added the option but is not needed in this child.
   def self.remove_general_option(option_cls)
     option_cls = option_cls.constantize if option_cls.is_a? String
-    self.general_options = self.general_options.except(option_cls)
+    self.general_options = general_options.except(option_cls)
   end
 
   # To be called inside OptionParser block

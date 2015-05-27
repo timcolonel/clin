@@ -40,7 +40,7 @@ class PrintCommand < DispatchCommand
   end
 end
 
-if __FILE__== $0
+if __FILE__ == $PROGRAM_NAME
   Clin::CommandDispatcher.parse('you display "My Message"').run
   puts
   puts '=' * 60
