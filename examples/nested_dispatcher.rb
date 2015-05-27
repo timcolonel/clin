@@ -5,7 +5,9 @@ require 'clin'
 class DispatchCommand < Clin::Command
   arguments 'you <args>...'
   dispatch :args, prefix: 'you'
-  general_option Clin::HelpOptions
+  skip_options true
+
+  flag_option :verbose, 'Verbose the output'
 
   self.description = 'YOU print the given message'
 
@@ -17,8 +19,8 @@ end
 # Simple command Example
 class DisplayCommand < DispatchCommand
   arguments 'you display <message>'
-
-  general_option Clin::HelpOptions
+  option :echo, 'Display more text'
+  option :times, 'Display the text multiple times', type: Integer
 
   self.description = 'Display the given message'
 
@@ -31,8 +33,6 @@ end
 class PrintCommand < DispatchCommand
   arguments 'you print <message>'
 
-  general_option Clin::HelpOptions
-
   self.description = 'Print the given message'
 
   def run
@@ -40,27 +40,28 @@ class PrintCommand < DispatchCommand
   end
 end
 
-
-Clin::CommandDispatcher.parse('you display "My Message"').run
-puts
-puts '=' * 60
-puts
-Clin::CommandDispatcher.parse('you print "My Message"').run
-puts
-puts '=' * 60
-puts
-begin
-  Clin::CommandDispatcher.parse('you -h').run
-rescue Clin::CommandLineError => e
-  puts e
-end
-puts
-puts '=' * 60
-puts
-begin
-  Clin::CommandDispatcher.parse('-h')
-rescue Clin::CommandLineError => e
-  puts e
+if __FILE__== $0
+  Clin::CommandDispatcher.parse('you display "My Message"').run
+  puts
+  puts '=' * 60
+  puts
+  Clin::CommandDispatcher.parse('you print "My Message"').run
+  puts
+  puts '=' * 60
+  puts
+  begin
+    Clin::CommandDispatcher.parse('you -h').run
+  rescue Clin::CommandLineError => e
+    puts e
+  end
+  puts
+  puts '=' * 60
+  puts
+  begin
+    Clin::CommandDispatcher.parse('-h')
+  rescue Clin::CommandLineError => e
+    puts e
+  end
 end
 
 # Output:

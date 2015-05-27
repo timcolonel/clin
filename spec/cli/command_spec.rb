@@ -102,7 +102,7 @@ RSpec.describe Clin::Command do
       expect { subject.parse_options(%w(--name)) }.to raise_error(OptionParser::MissingArgument)
     end
     it 'raise error when unknown option' do
-      expect { subject.parse_options(%w(--other)) }.to raise_error(OptionParser::InvalidOption)
+      expect { subject.parse_options(%w(--other)) }.to raise_error(Clin::OptionError)
     end
 
     it { expect(subject.parse_options(%w(--name MyName))).to eq(name: 'MyName') }
@@ -220,6 +220,36 @@ RSpec.describe Clin::Command do
         subject.exe_name(name)
       end
       it { expect(subject.exe_name).to eq(name) }
+    end
+  end
+
+  describe '.skipped_options!' do
+    before :all do
+      @command = Class.new(Clin::Command)
+      @command.skip_options true
+    end
+    context 'when all options should be skipped' do
+      it { expect(@command.skipped_options(%w(pos arg))).to eq([]) }
+
+      it { expect(@command.skipped_options(%w(pos arg --ignore -t))).to eq(%w(--ignore -t)) }
+
+      it { expect(@command.skipped_options(%w(pos arg --ignore value -t))).
+          to eq(%w(--ignore value -t)) }
+
+    end
+    context 'when option are define they should not be skipped' do
+      before :all do
+        @command.flag_option :verbose, 'Verbose'
+      end
+
+      it { expect(@command.skipped_options(%w(pos arg --ignore value -t -v))).
+          to eq(%w(--ignore value -t)) }
+
+      it { expect(@command.skipped_options(%w(pos arg --verbose --ignore value -t))).
+          to eq(%w(--ignore value -t)) }
+
+      it { expect(@command.skipped_options(%w(pos arg --ignore value --verbose -t))).
+          to eq(%w(--ignore value -t)) }
     end
   end
 end

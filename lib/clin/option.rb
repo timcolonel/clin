@@ -2,16 +2,17 @@ require 'clin'
 
 # Option container.
 class Clin::Option
-  attr_accessor :name, :description, :optional_argument, :block
+  attr_accessor :name, :description, :optional_argument, :block, :type
   attr_reader :short, :long, :argument
 
-  def initialize(name, description, short: nil, long: nil, argument: nil, optional_argument: false, &block)
+  def initialize(name, description, short: nil, long: nil, argument: nil, optional_argument: false, type: nil, &block)
     @name = name
     @description = description
     @short = short
     @long = long
     @optional_argument = optional_argument
     @argument = argument
+    @type = type
     @block = block
   end
 
@@ -70,7 +71,7 @@ class Clin::Option
   end
 
   def option_parser_arguments
-    args = [short, long_argument, description]
+    args = [short, long_argument, @type, description]
     args.compact
   end
 

@@ -15,10 +15,12 @@ class Clin::Command < Clin::CommandOptionsMixin
   class_attribute :_redispatch_args
   class_attribute :_abstract
   class_attribute :_exe_name
+  class_attribute :_skip_options
 
   self.args = []
   self.description = ''
   self._abstract = false
+  self._skip_options = false
 
 
   # Trigger when a class inherit this class
@@ -27,6 +29,7 @@ class Clin::Command < Clin::CommandOptionsMixin
   def self.inherited(subclass)
     subclass._redispatch_args = nil
     subclass._abstract = false
+    subclass._skip_options = false
     super
   end
 
@@ -51,6 +54,14 @@ class Clin::Command < Clin::CommandOptionsMixin
     self._exe_name ||= Clin.exe_name
   end
 
+  def self.skip_options(value)
+    self._skip_options = value
+  end
+
+  def self.skip_options?
+    self._skip_options
+  end
+
   def self.arguments(args)
     self.args = []
     [*args].map(&:split).flatten.each do |arg|
@@ -71,6 +82,7 @@ class Clin::Command < Clin::CommandOptionsMixin
   # @param argv [Array|String] command line to parse.
   def self.parse(argv = ARGV, fallback_help: true)
     argv = Shellwords.split(argv) if argv.is_a? String
+    original_argv = argv
     argv = argv.clone
     options_map = parse_options(argv)
     error = nil
@@ -85,7 +97,7 @@ class Clin::Command < Clin::CommandOptionsMixin
     args_map ||= {}
 
     options = options_map.merge(args_map)
-    return handle_dispatch(options) unless self._redispatch_args.nil?
+    return handle_dispatch(options, original_argv) unless self._redispatch_args.nil?
     obj = new(options)
     if error
       fail Clin::HelpError, option_parser if fallback_help
@@ -99,8 +111,39 @@ class Clin::Command < Clin::CommandOptionsMixin
   def self.parse_options(argv)
     out = {}
     parser = option_parser(out)
-    parser.parse!(argv)
+    # options_first!(argv) if _skip_options
+    skipped = skipped_options(argv)
+    argv.reject! { |x| skipped.include?(x) }
+    begin
+      parser.parse!(argv)
+    rescue OptionParser::InvalidOption => e
+      fail Clin::OptionError, e.to_s
+    end
+    out[:skipped_options] = skipped if skip_options?
     out
+  end
+
+  # Get the options that have been skipped by options_first!
+  def self.skipped_options(argv)
+    argv = argv.dup
+    skipped = []
+    parser = option_parser
+    while true
+      begin
+        parser.parse!(argv)
+        break
+      rescue OptionParser::InvalidOption => e
+        if skip_options?
+          skipped << e.to_s.sub(/invalid option:\s+/, '')
+          unless argv.empty? or argv.first.start_with?('-')
+            skipped << argv.shift
+          end
+        else
+          fail Clin::OptionError, e.to_s
+        end
+      end
+    end
+    skipped
   end
 
   # Build the Option Parser object
@@ -150,13 +193,15 @@ class Clin::Command < Clin::CommandOptionsMixin
   end
 
   # Method called after the argument have been parsed and before creating the command
-  # @param params [List<String>] Parsed params from the command line.
-  def self.handle_dispatch(params)
+  # @param params [Array<String>] Parsed params from the command line.
+  # @param argv [Array<String>] Original arguments. Needed if options were skipped.
+  def self.handle_dispatch(params, argv =[])
     args, prefix, commands = self._redispatch_args
     commands ||= default_commands
     dispatcher = Clin::CommandDispatcher.new(commands)
-    args = args.map { |x| params[x] }.flatten
+    args = args.map { |x| params[x] }.flatten.compact
     args = prefix.split + args unless prefix.nil?
+    args += params[:skipped_options] if skip_options?
     begin
       dispatcher.parse(args)
     rescue Clin::HelpError
