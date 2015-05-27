@@ -233,7 +233,7 @@ class Clin::Command < Clin::CommandOptionsMixin
 
   attr_accessor :params
 
-  def initialize(params)
+  def initialize(params={})
     @params = params
     self.class.execute_general_options(params)
   end
