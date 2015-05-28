@@ -14,6 +14,9 @@ module Clin
 
   # Error when a fixed argument is not matched
   class FixedArgumentError < ArgumentError
+    # Create a new FixedArgumentError
+    # @param argument [String] Name of the fixed argument
+    # @param got [String] What argument was in place of the fixed argument
     def initialize(argument = '', got = '')
       super("Expecting '#{argument}' but got '#{got}'")
     end
@@ -21,8 +24,10 @@ module Clin
 
   # Error when a command is missing an argument
   class MissingArgumentError < ArgumentError
-    def initialize(message = '')
-      super("Missing argument #{message}")
+    # Create a new MissingArgumentError
+    # @param argument [String] Name of the missing argument
+    def initialize(argument = '')
+      super("Missing argument #{argument}")
     end
   end
 

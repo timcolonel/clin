@@ -6,6 +6,7 @@ require 'clin/version'
 # Clin Global module. All classes and clin modules should be inside this module
 module Clin
   class << self
+    # Set the global exe name. `Clin.exe_name = 'git'`
     attr_writer :exe_name
 
     def default_exe_name
@@ -27,3 +28,5 @@ require 'clin/general_option'
 require 'clin/command_dispatcher'
 require 'clin/common/help_options'
 require 'clin/errors'
+require 'clin/option'
+require 'clin/option_list'

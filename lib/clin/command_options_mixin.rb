@@ -1,5 +1,6 @@
 require 'clin'
 require 'clin/option'
+require 'clin/option_list'
 
 # Template class for reusable options and commands
 # It provide the method to add options to a command
@@ -51,6 +52,21 @@ class Clin::CommandOptionsMixin
     add_option Clin::Option.new(name, description, **config.merge(argument: false), &block)
   end
 
+  # Add a list option.
+  # @see Clin::OptionList#initialize
+  def self.list_option(name, description, **config)
+    add_option Clin::OptionList.new(name, description, **config)
+  end
+
+  # Add a list options that don't take arguments
+  # Same as .list_option but set +argument+ to false
+  # @see Clin::OptionList#initialize
+  def self.list_flag_option(name, description, **config)
+    add_option Clin::OptionList.new(name, description, **config.merge(argument: false))
+  end
+
+  # Add a new option.
+  # @param option [Clin::Option] option to add.
   def self.add_option(option)
     # Need to use += instead of << otherwise the parent class will also be changed
     self.options += [option]

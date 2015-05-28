@@ -2,11 +2,20 @@ require 'clin'
 
 # Option container.
 class Clin::Option
-  attr_accessor :name, :description, :optional_argument, :block, :type
+  attr_accessor :name, :description, :optional_argument, :block, :type, :default
   attr_reader :short, :long, :argument
 
+  # Create a new option.
+  # @param name [String] Option name.
+  # @param description [String] Option Description.
+  # @param short [String|Boolean]
+  # @param long [String|Boolean]
+  # @param argument [String|Boolean]
+  # @param argument_optional [Boolean]
+  # @param type [Class]
+  # @param block [Block]
   def initialize(name, description, short: nil, long: nil,
-                 argument: nil, argument_optional: false, type: nil, &block)
+                 argument: nil, argument_optional: false, type: nil, default: nil, &block)
     @name = name
     @description = description
     @short = short
@@ -15,12 +24,14 @@ class Clin::Option
     @argument = argument
     @type = type
     @block = block
+    @default = default
   end
 
   # Register the option to the Option Parser
   # @param opts [OptionParser]
   # @param out [Hash] Out options mapping
   def register(opts, out)
+    load_default(out)
     if @block.nil?
       opts.on(*option_parser_arguments) do |value|
         on(value, out)
@@ -67,7 +78,7 @@ class Clin::Option
   # If @argument is false it will return nil
   # @return [String]
   def argument
-    return nil if @argument.eql? false
+    return nil if flag?
     @argument ||= default_argument
   end
 
@@ -76,8 +87,27 @@ class Clin::Option
     args.compact
   end
 
+  # Function called by the OptionParser when the option is used
+  # If no block is given this is called otherwise it call the block
   def on(value, out)
     out[@name] = value
+  end
+
+  # If the option is a flag option.
+  # i.e Doesn't accept argument.
+  def flag?
+    @argument.eql? false
+  end
+
+  # Init the output Hash with the default values. Must be called before parsing.
+  # @param out [Hash]
+  def load_default(out)
+    return if @default.nil?
+    begin
+      out[@name] = @default.clone
+    rescue
+      out[@name] = @default
+    end
   end
 
   def ==(other)
@@ -88,6 +118,7 @@ class Clin::Option
   def to_a
     [@name, @description, @type, short, long, argument, @optional_argument, @block]
   end
+
 
   protected
 
@@ -101,3 +132,4 @@ class Clin::Option
     out
   end
 end
+
