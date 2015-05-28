@@ -114,5 +114,4 @@ class Clin::CommandOptionsMixin
       gopts.execute(options)
     end
   end
-
 end

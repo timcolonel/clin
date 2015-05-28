@@ -1,8 +1,8 @@
 require 'clin'
 require 'clin/option'
 
+# Option that can be used multiple time in the command line
 class Clin::OptionList < Clin::Option
-
   # @see Clin::Option#initialize
   def initialize(*args)
     super

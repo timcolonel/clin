@@ -153,4 +153,3 @@ class Clin::Option
     out
   end
 end
-
