@@ -6,7 +6,7 @@ RSpec.describe Clin::CommandParser do
       @command = Class.new(Clin::Command)
       @command.add_option Clin::Option.new(:name, 'Set name')
       @command.add_option Clin::Option.new(:verbose, 'Set verbose', argument: false)
-      @command.add_option Clin::Option.new(:echo, 'Set name', optional_argument: true)
+      @command.add_option Clin::Option.new(:echo, 'Set name', argument_optional: true)
     end
 
     subject { Clin::CommandParser.new(@command, []) }

@@ -6,12 +6,12 @@ class Clin::Option
   attr_reader :short, :long, :argument
 
   def initialize(name, description, short: nil, long: nil,
-                 argument: nil, optional_argument: false, type: nil, &block)
+                 argument: nil, argument_optional: false, type: nil, &block)
     @name = name
     @description = description
     @short = short
     @long = long
-    @optional_argument = optional_argument
+    @optional_argument = argument_optional
     @argument = argument
     @type = type
     @block = block
@@ -37,7 +37,7 @@ class Clin::Option
   end
 
   def default_long
-    "--#{name.downcase}"
+    "--#{name.to_s.downcase.dasherize}"
   end
 
   def default_argument

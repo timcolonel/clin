@@ -68,9 +68,17 @@ RSpec.describe Clin::Option do
   end
 
   describe '#default_long' do
-    subject { Clin::Option.new(:echo, Faker::Lorem.sentence) }
+    context 'simple name' do
+      subject { Clin::Option.new(:echo, Faker::Lorem.sentence) }
 
-    it { expect(subject.default_long).to eq('--echo') }
+      it { expect(subject.default_long).to eq('--echo') }
+    end
+
+    context 'when name contains underscores' do
+      subject { Clin::Option.new(:echo_more, Faker::Lorem.sentence) }
+
+      it { expect(subject.default_long.to_s).to eq('--echo-more') }
+    end
   end
 
   describe '#default_argument' do
