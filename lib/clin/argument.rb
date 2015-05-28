@@ -18,14 +18,16 @@ class Clin::Argument
     @name = check_variable(argument)
   end
 
+  # Check if the argument is optional(i.e [arg])
   def check_optional(argument)
-    if check_between(argument, '[', ']')
+    if beck_between(argument, '[', ']')
       @optional = true
       return argument[1...-1]
     end
     argument
   end
 
+  # Check if the argument is multiple(i.e arg...)
   def check_multiple(argument)
     if argument.end_with? '...'
       @multiple = true
@@ -34,8 +36,9 @@ class Clin::Argument
     argument
   end
 
+  # Check if the argument is variable(i.e <arg>)
   def check_variable(argument)
-    if check_between(argument, '<', '>')
+    if beck_between(argument, '<', '>')
       @variable = true
       return argument[1...-1]
     end
@@ -46,17 +49,18 @@ class Clin::Argument
   def parse(argv)
     return handle_empty if argv.empty?
     if @multiple
-      ensure_name(argv) unless @variable
+      ensure_fixed(argv) unless @variable
       [argv, []]
     else
-      ensure_name(argv[0]) unless @variable
+      ensure_fixed(argv[0]) unless @variable
       [argv[0], argv[1..-1]]
     end
   end
 
-  private
+  protected
 
-  def ensure_name(args)
+  # Ensure the argument are equal to the fix value
+  def ensure_fixed(args)
     [*args].each do |arg|
       next if arg == @name
       fail Clin::FixedArgumentError, @name, arg
@@ -77,7 +81,20 @@ class Clin::Argument
     end
   end
 
-  def check_between(argument, start_char, end_char)
+  # Check +argument+ start with +start_char+ and end with +end_char+
+  # @param argument [String]
+  # @param start_char [Char]
+  # @param end_char [Char]
+  # @return [Boolean]
+  # @raise [Clin::Error] if it start but not end with.
+  # ```
+  #   beck_between('[arg]', '['. ']') # => true
+  #   beck_between('<arg>', '<'. '>') # => true
+  #   beck_between('[<arg>]', '['. ']') # => true
+  #   beck_between('[<arg>]', '<'. '>') # => false
+  #   beck_between('[<arg>', '<'. '>') # => raise Clin::Error
+  # ```
+  def beck_between(argument, start_char, end_char)
     if argument[0] == start_char
       if argument[-1] != end_char
         fail Clin::Error, "Argument format error! Cannot start

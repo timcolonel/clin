@@ -1,6 +1,7 @@
 require 'clin'
 
 # Option container.
+# Prefer the `.option`, `.flag_option`,... class methods than `.add_option Option.new(...)`
 class Clin::Option
   attr_accessor :name, :description, :optional_argument, :block, :type, :default
   attr_reader :short, :long, :argument
@@ -13,6 +14,8 @@ class Clin::Option
   # @param argument [String|Boolean]
   # @param argument_optional [Boolean]
   # @param type [Class]
+  # @param default [Class] If the option is not specified set the default value.
+  #   If default is nil the key will not be added to the params
   # @param block [Block]
   def initialize(name, description, short: nil, long: nil,
                  argument: nil, argument_optional: false, type: nil, default: nil, &block)
@@ -43,14 +46,30 @@ class Clin::Option
     end
   end
 
+  # Default option short name.
+  # ```
+  # :verbose => '-v'
+  # :help => '-h'
+  # :Require => '-r'
+  # ```
   def default_short
     "-#{name[0].downcase}"
   end
 
+  # Default option long name.
+  # ```
+  # :verbose => '--verbose'
+  # :Require => '--require'
+  # :add_stuff => '--add-stuff'
+  # ```
   def default_long
     "--#{name.to_s.downcase.dasherize}"
   end
 
+  # Default argument
+  # ```
+  # :Require => 'REQUIRE'
+  # ```
   def default_argument
     name.to_s.upcase
   end
@@ -115,13 +134,15 @@ class Clin::Option
     to_a == other.to_a
   end
 
+  # Return array of the attributes
   def to_a
-    [@name, @description, @type, short, long, argument, @optional_argument, @block]
+    [@name, @description, @type, short, long, argument, @optional_argument, @default, @block]
   end
 
-
-  protected
-
+  # Get the long argument syntax.
+  # ```
+  #  :require => '--require REQUIRE'
+  # ```
   def long_argument
     return nil unless long
     out = long

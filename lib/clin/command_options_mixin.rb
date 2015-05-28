@@ -100,4 +100,19 @@ class Clin::CommandOptionsMixin
       option.class.register_options(opts, out)
     end
   end
+
+  # Call #execute on each of the general options.
+  # This is called during the command initialization
+  # e.g. A verbose general option execute would be:
+  # ```
+  # def execute(params)
+  #  MyApp.verbose = true if params[:verbose]
+  # end
+  # ```
+  def self.execute_general_options(options)
+    general_options.each do |_cls, gopts|
+      gopts.execute(options)
+    end
+  end
+
 end

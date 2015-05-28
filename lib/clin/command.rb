@@ -104,12 +104,6 @@ class Clin::Command < Clin::CommandOptionsMixin
     end
   end
 
-  def self.execute_general_options(options)
-    general_options.each do |_cls, gopts|
-      gopts.execute(options)
-    end
-  end
-
   # Redispatch the command to a sub command with the given arguments
   # @param args [Array<String>|String] New argument to parse
   # @param prefix [String] Prefix to add to the beginning of the command

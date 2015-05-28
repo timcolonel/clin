@@ -105,6 +105,8 @@ class Clin::CommandParser
     args
   end
 
+  # Guard that check if there was an error and fail HelpError if there was
+  # @raise [Clin::HelpError]
   def handle_error(error)
     return unless error
     fail Clin::HelpError, @command.option_parser if @fallback_help

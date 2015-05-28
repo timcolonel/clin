@@ -3,6 +3,7 @@ require 'clin/command'
 
 # Class charge dispatching the CL to the right command
 class Clin::CommandDispatcher
+  # Contains the list of commands the dispatch will test.
   attr_accessor :commands
 
   # Create a new command dispatcher.
