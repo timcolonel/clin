@@ -76,6 +76,13 @@ RSpec.describe Clin::Shell do
       expects_scan('Is earth round? [Yn]', '')
       expect(subject.yes_or_no('Is earth round?', default: 'yes')).to be true
     end
+
+    it 'ask the user only once when he reply always' do
+      expects_scan('Is earth round? [yna]', 'a').once
+      expect(subject.yes_or_no('Is earth round?', persist: true)).to be true
+      expect(subject.yes_or_no('Is earth round?', persist: true)).to be true
+      expect(subject.yes_or_no('Is earth round?', persist: true)).to be true
+    end
   end
 
   describe '#yes?' do
