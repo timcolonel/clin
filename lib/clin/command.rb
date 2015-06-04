@@ -139,10 +139,16 @@ class Clin::Command < Clin::CommandOptionsMixin
 
   general_option 'Clin::HelpOptions'
 
+  # Contains the parameters
   attr_accessor :params
+
+  # Contains a shell object for user interaction in the command
+  # @see Clin::Shell
+  attr_accessor :shell
 
   def initialize(params = {})
     @params = params
+    @shell = Clin::Shell.new
     self.class.execute_general_options(params)
   end
 end

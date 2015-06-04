@@ -1,9 +1,9 @@
 $LOAD_PATH.push File.expand_path('../../lib', __FILE__)
 require 'clin'
 
-a = [1, 2, 3]
+shell = Clin::Shell.new
+a = []
+# a << shell.choose('Is it true 1?', %w(usa france germany italy uk), allow_initials: true)
+a << shell.choose('Is it true 1?', {usa: 'United states', france: 'France'}, allow_initials: true)
 
-b, c = a
-
-puts b
-puts c
+puts a.to_s
