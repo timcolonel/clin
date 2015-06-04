@@ -6,13 +6,13 @@ RSpec.describe Clin::Shell do
   end
 
   describe '#choice_message' do
-    let(:options) { %w(yes no maybe) }
+    let(:options) { {yes: '', no: '', maybe: ''} }
     it { expect(subject.send(:choice_message, options)).to eq('[yes,no,maybe]') }
-    it { expect(subject.send(:choice_message, options, default: 'yes')).to eq('[YES,no,maybe]') }
-    it { expect(subject.send(:choice_message, options, default: 'no')).to eq('[yes,NO,maybe]') }
+    it { expect(subject.send(:choice_message, options, default: :yes)).to eq('[YES,no,maybe]') }
+    it { expect(subject.send(:choice_message, options, default: :no)).to eq('[yes,NO,maybe]') }
     it { expect(subject.send(:choice_message, options, initials: true)).to eq('[ynm]') }
-    it { expect(subject.send(:choice_message, options, default: 'yes', initials: true)).to eq('[Ynm]') }
-    it { expect(subject.send(:choice_message, options, default: 'maybe', initials: true)).to eq('[ynM]') }
+    it { expect(subject.send(:choice_message, options, default: :yes, initials: true)).to eq('[Ynm]') }
+    it { expect(subject.send(:choice_message, options, default: :maybe, initials: true)).to eq('[ynM]') }
   end
 
   describe '#ask' do
@@ -109,6 +109,39 @@ RSpec.describe Clin::Shell do
     it 'ask the user and return false if the user replies nothing' do
       expects_scan('Is the earth flat? [yN]', '')
       expect(subject.no?('Is the earth flat?')).to be false
+    end
+  end
+
+  describe '#overwrite?' do
+    it 'ask the user and return true when he reply yes' do
+      expects_scan("Overwrite 'some.txt'? [Ynaqh]", 'y')
+      expect(subject.overwrite?('some.txt')).to be true
+    end
+
+    it 'ask the user and return false when he reply false' do
+      expects_scan("Overwrite 'some.txt'? [Ynaqh]", 'n')
+      expect(subject.overwrite?('some.txt')).to be false
+    end
+
+    it 'ask the user only once when he reply always' do
+      expects_scan("Overwrite 'some1.txt'? [Ynaqh]", 'a').once
+      expect(subject.overwrite?('some1.txt')).to be true
+      expect(subject.overwrite?('some2.txt')).to be true
+      expect(subject.overwrite?('some3.txt')).to be true
+    end
+
+    it 'ask the user and quit when he reply quit' do
+      expects_scan("Overwrite 'some.txt'? [Ynaqh]", 'q')
+      expect { subject.overwrite?('some.txt') }.to raise_error(SystemExit)
+    end
+
+    it 'ask the user and quit when he reply quit' do
+      expects_scan("Overwrite 'some.txt'? [Ynaqdh]", 'd', 'y')
+      expect(subject).to receive(:show_diff).with('some.txt', 'new_text').once
+      result = subject.overwrite?('some.txt') do
+        'new_text'
+      end
+      expect(result).to be true
     end
   end
 end

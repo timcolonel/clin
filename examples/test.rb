@@ -1,24 +1,16 @@
 $LOAD_PATH.push File.expand_path('../../lib', __FILE__)
 require 'clin'
 
-
-class Test
-
-  def foo
-    'foo'
-  end
-
-  private def bar
-    'bar'
-  end
-
-  def pub
-    'pub'
-  end
+shell = Clin::Shell.new
+a = []
+a << shell.override?('D:/dev/test/diff.txt') do
+  <<DOC
+Soruju was an aircraft
+carrier built for the Imperial
+Japanese Navy during
+the mid-1930s.
+DOC
 end
 
 
-t = Test.new
-puts t.foo
-puts t.pub
-puts t.bar
+puts a.to_s

@@ -9,6 +9,9 @@ module Clin
     # Set the global exe name. `Clin.exe_name = 'git'`
     attr_writer :exe_name
 
+    # Set the command when comparing 2 files(Used in the shell)
+    attr_writer :diff_cmd
+
     def default_exe_name
       'command'
     end
@@ -17,6 +20,10 @@ module Clin
     # If this is not override it will be 'command'
     def exe_name
       @exe_name ||= Clin.default_exe_name
+    end
+
+    def diff_cmd
+      @diff_cmd ||= 'diff -u'
     end
   end
 end

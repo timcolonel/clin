@@ -12,6 +12,7 @@ class Clin::Shell
     @in = input
     @out = output
     @yes_or_no_persist = false
+    @override_persist = false
   end
 
   # Ask a question
@@ -35,8 +36,8 @@ class Clin::Shell
   # If multiple choices start with the same initial
   # ONLY the first one will be able to be selected using its inital
   def choose(statement, choices, default: nil, allow_initials: false)
-    question = prepare_question(statement, choices, default: default, initials: allow_initials)
     choices = convert_choices(choices)
+    question = prepare_question(statement, choices, default: default, initials: allow_initials)
     loop do
       answer = ask(question, default: default)
       unless answer.nil?
@@ -53,16 +54,16 @@ class Clin::Shell
   # Expect the user the return yes or no(y/n also works)
   # @param statement [String] Question to ask
   # @param default [String] Default value(yes/no)
-  # @param persist [Boolean] Add "all" to the choices. When all is selected all the following call
-  #   to yes_or_no with persist: true will return true instead of asking the user.
+  # @param persist [Boolean] Add "always" to the choices. When all is selected all the following
+  # call to yes_or_no with persist: true will return true instead of asking the user.
   def yes_or_no(statement, default: nil, persist: false)
     options = %w(yes no)
     if persist
       return true if @yes_or_no_persist
-      options << 'all'
+      options << 'always'
     end
     choice = choose(statement, options, default: default, allow_initials: true)
-    if choice == 'all'
+    if choice == 'always'
       choice = 'yes'
       @yes_or_no_persist = true
     end
@@ -85,15 +86,50 @@ class Clin::Shell
     yes_or_no(statement, **options)
   end
 
+  # Overwrite helper method.
+  # Give the following options to the user
+  # - yes, Yes for this one
+  # - no, No for this one
+  # - all, Yes for all one
+  # - quit, Quit the program
+  # - diff, Diff the 2 files
+  # @param destination [String] Filename with the conflict
+  # @param block [Block] optional block that give the new content in case of diff
+  # @return [Boolean] If the file should be overwritten.
+  def overwrite?(destination, &block)
+    choices = file_conflict_choices
+    choices = choices.except(:diff) unless block_given?
+    return true if @override_persist
+    loop do
+      result = choose("Overwrite '#{destination}'?", choices, default: :yes, allow_initials: true)
+      case result
+      when :yes
+        return true
+      when :no
+        return false
+      when :always
+        return @override_persist = true
+      when :quit
+        puts 'Aborting...'
+        fail SystemExit
+      when :diff
+        show_diff(destination, block.call)
+        next
+      else
+        next
+      end
+    end
+  end
+
   protected def scan(statement)
     @out.print(statement + ' ')
     @in.gets
   end
 
   protected def choice_message(choices, default: nil, initials: false)
-    choices = choices.map { |x| x == default ? x.upcase : x }
+    choices = choices.keys.map { |x| x == default ? x.to_s.upcase : x }
     msg = if initials
-            choices.map { |x, _| x[0] }.join('')
+            choices.map { |x| x[0] }.join('')
           else
             choices.join(',')
           end
@@ -124,9 +160,26 @@ class Clin::Shell
   # Convert the choices to a hash with key being the choice and value the description
   protected def convert_choices(choices)
     if choices.is_a? Array
-      Hash[*choices.map { |k| [k.to_s, ''] }.flatten]
+      Hash[*choices.map { |k| [k, ''] }.flatten]
     elsif choices.is_a? Hash
-      Hash[choices.map { |k, v| [k.to_s, v] }]
+      choices
+    end
+  end
+
+  protected def file_conflict_choices
+    {yes: 'Overwrite',
+     no: 'Do not Overwrite',
+     always: 'Override this and all the next',
+     quit: 'Abort!',
+     diff: 'Show the difference',
+     help: 'Show this'}
+  end
+
+  protected def show_diff(old_file, new_content)
+    Tempfile.open(File.basename(old_file)) do |f|
+      f.write new_content
+      f.rewind
+      system %(#{Clin.diff_cmd} "#{old_file}" "#{f.path}")
     end
   end
 end
