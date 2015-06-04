@@ -65,6 +65,10 @@ class Clin::CommandOptionsMixin
     add_option Clin::OptionList.new(name, description, **config.merge(argument: false))
   end
 
+  def self.auto_option(name, usage, &block)
+    add_option Clin::Option.parse(name, usage, &block)
+  end
+
   # Add a new option.
   # @param option [Clin::Option] option to add.
   def self.add_option(option)

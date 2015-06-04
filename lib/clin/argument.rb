@@ -20,7 +20,7 @@ class Clin::Argument
 
   # Check if the argument is optional(i.e [arg])
   def check_optional(argument)
-    if beck_between(argument, '[', ']')
+    if check_between(argument, '[', ']')
       @optional = true
       return argument[1...-1]
     end
@@ -38,7 +38,7 @@ class Clin::Argument
 
   # Check if the argument is variable(i.e <arg>)
   def check_variable(argument)
-    if beck_between(argument, '<', '>')
+    if check_between(argument, '<', '>')
       @variable = true
       return argument[1...-1]
     end
@@ -94,7 +94,7 @@ class Clin::Argument
   #   beck_between('[<arg>]', '<'. '>') # => false
   #   beck_between('[<arg>', '<'. '>') # => raise Clin::Error
   # ```
-  def beck_between(argument, start_char, end_char)
+  def check_between(argument, start_char, end_char)
     if argument[0] == start_char
       if argument[-1] != end_char
         fail Clin::Error, "Argument format error! Cannot start

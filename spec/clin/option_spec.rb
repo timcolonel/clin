@@ -137,4 +137,44 @@ RSpec.describe Clin::Option do
       it { expect(subject.argument).to eq(nil) }
     end
   end
+
+  describe '.parse' do
+    let(:name) { Faker::Lorem.name }
+    context 'when no argument' do
+      subject { Clin::Option.parse(name, '-e --eko') }
+
+      it { expect(subject.name).to eq(name) }
+      it { expect(subject.short).to eq('-e') }
+      it { expect(subject.long).to eq('--eko') }
+      it { expect(subject.argument).to be nil }
+    end
+
+    context 'when argument' do
+      subject { Clin::Option.parse(name, '-e --eko=message') }
+
+      it { expect(subject.name).to eq(name) }
+      it { expect(subject.short).to eq('-e') }
+      it { expect(subject.long).to eq('--eko') }
+      it { expect(subject.argument).to eq('message') }
+    end
+
+    context 'when argument method 2' do
+      subject { Clin::Option.parse(name, '-e --eko=<message>') }
+
+      it { expect(subject.name).to eq(name) }
+      it { expect(subject.short).to eq('-e') }
+      it { expect(subject.long).to eq('--eko') }
+      it { expect(subject.argument).to eq('message') }
+    end
+
+    context 'when optional argument' do
+      subject { Clin::Option.parse(name, '-e --eko=[message]') }
+
+      it { expect(subject.name).to eq(name) }
+      it { expect(subject.short).to eq('-e') }
+      it { expect(subject.long).to eq('--eko') }
+      it { expect(subject.argument).to eq('message') }
+      it { expect(subject.optional_argument).to be true }
+    end
+  end
 end

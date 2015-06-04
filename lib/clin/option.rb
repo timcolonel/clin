@@ -3,8 +3,28 @@ require 'clin'
 # Option container.
 # Prefer the `.option`, `.flag_option`,... class methods than `.add_option Option.new(...)`
 class Clin::Option
+  class << self
+    def parse(name, usage, &block)
+      long = nil
+      short = nil
+      argument = nil
+      desc = []
+      usage.split.each do |segment|
+        if segment.start_with? '--'
+          long, argument = segment.split('=', 2)
+        elsif segment.start_with? '-'
+          short = segment
+        else
+          desc << segment
+        end
+      end
+      argument = false if argument.nil?
+      new(name, desc.join(' '), short: short, long: long, argument: argument, &block)
+    end
+  end
+
   attr_accessor :name, :description, :optional_argument, :block, :type, :default
-  attr_reader :short, :long, :argument
+  attr_writer :short, :long
 
   # Create a new option.
   # @param name [String] Option name.
@@ -24,7 +44,7 @@ class Clin::Option
     @short = short
     @long = long
     @optional_argument = argument_optional
-    @argument = argument
+    self.argument = argument
     @type = type
     @block = block
     @default = default
@@ -99,6 +119,18 @@ class Clin::Option
   def argument
     return nil if flag?
     @argument ||= default_argument
+  end
+
+  # Set the argument
+  # @param value
+  def argument=(value)
+    if value
+      arg = Clin::Argument.new(value)
+      @optional_argument = true if arg.optional
+      @argument = arg.name
+    else # If false or nil
+      @argument = value
+    end
   end
 
   def option_parser_arguments
