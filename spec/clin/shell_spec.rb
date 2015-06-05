@@ -2,7 +2,7 @@ require 'clin'
 
 RSpec.describe Clin::Shell do
   def expects_scan(message, *outputs)
-    expect(subject).to receive(:scan).with(message).and_return(*outputs)
+    expect(subject).to receive(:scan).with(message).and_return(*outputs).exactly(outputs.size).times
   end
 
   describe '#choice_message' do
@@ -78,7 +78,7 @@ RSpec.describe Clin::Shell do
     end
 
     it 'ask the user only once when he reply always' do
-      expects_scan('Is earth round? [yna]', 'a').once
+      expects_scan('Is earth round? [yna]', 'a')
       expect(subject.yes_or_no('Is earth round?', persist: true)).to be true
       expect(subject.yes_or_no('Is earth round?', persist: true)).to be true
       expect(subject.yes_or_no('Is earth round?', persist: true)).to be true
@@ -131,7 +131,7 @@ RSpec.describe Clin::Shell do
     end
 
     it 'ask the user only once when he reply always' do
-      expects_scan("Overwrite 'some1.txt'? [Ynaqh]", 'a').once
+      expects_scan("Overwrite 'some1.txt'? [Ynaqh]", 'a')
       expect(subject.overwrite?('some1.txt')).to be true
       expect(subject.overwrite?('some2.txt')).to be true
       expect(subject.overwrite?('some3.txt')).to be true
@@ -144,11 +144,18 @@ RSpec.describe Clin::Shell do
 
     it 'ask the user and quit when he reply quit' do
       expects_scan("Overwrite 'some.txt'? [Ynaqdh]", 'd', 'y')
-      expect(subject).to receive(:show_diff).with('some.txt', 'new_text').once
+      expect(subject).to receive(:show_diff).with('some.txt', 'new_text')
       result = subject.overwrite?('some.txt') do
         'new_text'
       end
       expect(result).to be true
+    end
+  end
+
+  describe '#keep?' do
+    it 'ask the user and return true when he reply yes' do
+      expects_scan("Overwrite 'some.txt'? [yNaqh]", '')
+      expect(subject.keep?('some.txt')).to be false
     end
   end
 end

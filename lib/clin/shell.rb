@@ -86,22 +86,22 @@ class Clin::Shell
     yes_or_no(statement, **options)
   end
 
-  # Overwrite helper method.
+  # File conflict helper method.
   # Give the following options to the user
   # - yes, Yes for this one
   # - no, No for this one
   # - all, Yes for all one
   # - quit, Quit the program
   # - diff, Diff the 2 files
-  # @param destination [String] Filename with the conflict
+  # @param filename [String] Filename with the conflict
   # @param block [Block] optional block that give the new content in case of diff
   # @return [Boolean] If the file should be overwritten.
-  def overwrite?(destination, &block)
+  def file_conflict(filename, default: nil, &block)
     choices = file_conflict_choices
     choices = choices.except(:diff) unless block_given?
     return true if @override_persist
     loop do
-      result = choose("Overwrite '#{destination}'?", choices, default: :yes, allow_initials: true)
+      result = choose("Overwrite '#{filename}'?", choices, default: default, allow_initials: true)
       case result
       when :yes
         return true
@@ -113,12 +113,22 @@ class Clin::Shell
         puts 'Aborting...'
         fail SystemExit
       when :diff
-        show_diff(destination, block.call)
+        show_diff(filename, block.call)
         next
       else
         next
       end
     end
+  end
+
+  # File conflict question defaulted to yes
+  def overwrite?(filename, &block)
+    file_conflict(filename, default: :yes, &block)
+  end
+
+  # File conflict question defaulted to no
+  def keep?(filename, &block)
+    file_conflict(filename, default: :no, &block)
   end
 
   protected def scan(statement)

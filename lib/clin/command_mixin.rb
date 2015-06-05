@@ -1,5 +1,6 @@
 require 'clin'
 
+# Namespace module for all the command mixins
 module Clin::CommandMixin
 end
 

@@ -19,7 +19,7 @@ RSpec.describe Clin::CommandMixin::Core do
   end
 
   describe '.priority' do
-    subject { subject }
+    subject { new_subject }
     it 'get the default priority' do
       expect(subject.priority).to be subject._default_priority
     end
