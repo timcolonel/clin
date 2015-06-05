@@ -9,7 +9,7 @@ class DispatchCommand < Clin::Command
 
   flag_option :verbose, 'Verbose the output'
 
-  self.description = 'YOU print the given message'
+  description 'YOU print the given message'
 
   def run
     puts 'Should not be called'
@@ -22,7 +22,7 @@ class DisplayCommand < DispatchCommand
   option :echo, 'Display more text'
   option :times, 'Display the text multiple times', type: Integer
 
-  self.description = 'Display the given message'
+  description 'Display the given message'
 
   def run
     puts "I Display: '#{params[:message]}'"
@@ -33,7 +33,7 @@ end
 class PrintCommand < DispatchCommand
   arguments 'you print <message>'
 
-  self.description = 'Print the given message'
+  description 'Print the given message'
 
   def run
     puts "I Print: '#{params[:message]}'"

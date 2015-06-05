@@ -1,9 +1,14 @@
 require 'spec_helper'
-require 'clin/command_options_mixin'
 
-RSpec.describe Clin::CommandOptionsMixin do
+RSpec.describe Clin::CommandMixin::Options do
+  def new_subject
+    a = Class.new
+    a.include Clin::CommandMixin::Options
+    a
+  end
+
   describe '#add_option' do
-    subject { Class.new(Clin::CommandOptionsMixin) }
+    subject { new_subject }
     let(:option) { Clin::Option.new(:name, '-n') }
     before do
       subject.add_option option
@@ -11,11 +16,10 @@ RSpec.describe Clin::CommandOptionsMixin do
 
     it { expect(subject.options.size).to be 1 }
     it { expect(subject.options.first).to eq option }
-    it { expect(Clin::CommandOptionsMixin.options.size).to be 0 }
   end
 
   describe '#option' do
-    subject { Class.new(Clin::CommandOptionsMixin) }
+    subject { new_subject }
     let(:args) { [:name, '-n'] }
     let(:option) { Clin::Option.new(*args) }
 
@@ -29,7 +33,7 @@ RSpec.describe Clin::CommandOptionsMixin do
   end
 
   describe '#general_option' do
-    subject { Class.new(Clin::CommandOptionsMixin) }
+    subject { new_subject }
     let(:option) { double(:option, register_options: true, new: true) }
     before do
       subject.general_option option
@@ -37,11 +41,10 @@ RSpec.describe Clin::CommandOptionsMixin do
     it { expect(option).to have_received(:new) }
     it { expect(subject.general_options.size).to be 1 }
     it { expect(subject.general_options.values.first).to eq(true) }
-    it { expect(Clin::CommandOptionsMixin.general_options.size).to be 0 }
   end
 
   describe '#register_options' do
-    subject { Class.new(Clin::CommandOptionsMixin) }
+    subject { new_subject }
     let(:opt1) { double(:option, register: true) }
     let(:opt2) { double(:option, register: true) }
     let(:g_opt_cls) { double(:general_option_class, register_options: true) }

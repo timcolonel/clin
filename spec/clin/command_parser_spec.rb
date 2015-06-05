@@ -130,8 +130,8 @@ RSpec.describe Clin::CommandParser do
     end
 
     context 'when using commands' do
-      let(:cmd1) { double(:command) }
-      let(:cmd2) { double(:command) }
+      let(:cmd1) { double(:command_mixin) }
+      let(:cmd2) { double(:command_mixin) }
       before do
         @command.dispatch :args, commands: [cmd1, cmd2]
         allow_any_instance_of(Clin::CommandDispatcher).to receive(:initialize)

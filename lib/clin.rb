@@ -28,9 +28,9 @@ module Clin
   end
 end
 
+require 'clin/command_mixin'
 require 'clin/command'
 require 'clin/command_parser'
-require 'clin/command_options_mixin'
 require 'clin/general_option'
 require 'clin/command_dispatcher'
 require 'clin/common/help_options'

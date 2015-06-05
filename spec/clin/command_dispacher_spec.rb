@@ -43,8 +43,8 @@ RSpec.describe Clin::CommandDispatcher do
   end
 
   describe '#parse' do
-    let(:cmd1) { double(:command, parse: 'cmd1', usage: 'cmd1 use') }
-    let(:cmd2) { double(:command, parse: 'cmd2', usage: 'cmd1 use') }
+    let(:cmd1) { double(:command_mixin, parse: 'cmd1', usage: 'cmd1 use') }
+    let(:cmd2) { double(:command_mixin, parse: 'cmd2', usage: 'cmd1 use') }
     let(:args) { %w(some args) }
     subject { Clin::CommandDispatcher.new(cmd1, cmd2) }
     context 'when first command match' do

@@ -67,9 +67,9 @@ RSpec.describe Clin::Command do
       subject.arguments(%w(remote <args>...))
     end
 
-    let(:cmd1) { double(:command, usage: 'cmd1') }
-    let(:cmd2) { double(:command, usage: 'cmd2') }
-    let(:cmd3) { double(:command, usage: 'cmd3') }
+    let(:cmd1) { double(:command_mixin, usage: 'cmd1') }
+    let(:cmd2) { double(:command_mixin, usage: 'cmd2') }
+    let(:cmd3) { double(:command_mixin, usage: 'cmd3') }
     let(:cmds) { [cmd1, cmd2, cmd3] }
     let(:opts) { double(:option_parser, separator: true) }
     before do

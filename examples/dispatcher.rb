@@ -5,7 +5,7 @@ require 'clin'
 class DisplayCommand < Clin::Command
   arguments 'display <message>'
 
-  self.description = 'Display the given message'
+  description 'Display the given message'
 
   def run
     puts "Display: '#{params[:message]}'"
@@ -16,7 +16,7 @@ end
 class PrintCommand < Clin::Command
   arguments 'print <message>'
 
-  self.description = 'Print the given message'
+  description 'Print the given message'
 
   def run
     puts "Print: '#{params[:message]}'"
