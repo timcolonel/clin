@@ -24,7 +24,12 @@ class Clin::Option
   end
 
   attr_accessor :name, :description, :optional_argument, :block, :type, :default
-  attr_writer :short, :long
+
+  # Set the short name(e.g. -v for verbose)
+  attr_writer :short
+
+  # Set the long name(e.g. --verbose for verbose)
+  attr_writer :long
 
   # Create a new option.
   # @param name [String] Option name.

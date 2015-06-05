@@ -3,6 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/timcolonel/clin/badge.svg?branch=master)](https://coveralls.io/r/timcolonel/clin?branch=master)
 [![Code Climate](https://codeclimate.com/github/timcolonel/clin/badges/gpa.svg)](https://codeclimate.com/github/timcolonel/clin)
 [![Inline docs](http://inch-ci.org/github/timcolonel/clin.svg?branch=master)](http://inch-ci.org/github/timcolonel/clin)
+
 Clin is Command Line Interface library that provide an clean api for complex command configuration.
 The way Clin is design allow a command defined by the user to be called via the command line as well as directly in the code without any additional configuration
 ## Installation

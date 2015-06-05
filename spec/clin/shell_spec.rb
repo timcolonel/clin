@@ -5,16 +5,6 @@ RSpec.describe Clin::Shell do
     expect(subject).to receive(:scan).with(message).and_return(*outputs).exactly(outputs.size).times
   end
 
-  describe '#choice_message' do
-    let(:options) { {yes: '', no: '', maybe: ''} }
-    it { expect(subject.send(:choice_message, options)).to eq('[yes,no,maybe]') }
-    it { expect(subject.send(:choice_message, options, default: :yes)).to eq('[YES,no,maybe]') }
-    it { expect(subject.send(:choice_message, options, default: :no)).to eq('[yes,NO,maybe]') }
-    it { expect(subject.send(:choice_message, options, initials: true)).to eq('[ynm]') }
-    it { expect(subject.send(:choice_message, options, default: :yes, initials: true)).to eq('[Ynm]') }
-    it { expect(subject.send(:choice_message, options, default: :maybe, initials: true)).to eq('[ynM]') }
-  end
-
   describe '#ask' do
     it 'ask for a question and return user reply' do
       expects_scan('What is your name?', 'Smith')
@@ -44,13 +34,8 @@ RSpec.describe Clin::Shell do
       expects_scan('Where are you from? [ufgi]', 'i')
       expect(subject.choose('Where are you from?', countries, allow_initials: true)).to eq('italy')
     end
-
-    it 'keep asking until the answer is valid' do
-      expects_scan('Where are you from? [usa,france,germany,italy]', 'spain', 'russia', 'france')
-      expect(subject).to receive(:print_choices_help).twice
-      expect(subject.choose('Where are you from?', countries)).to eq('france')
-    end
   end
+
   describe '#yes_or_no' do
     it 'asks the user and returns true if the user replies y' do
       expects_scan('Is earth round? [yn]', 'y')
@@ -142,9 +127,10 @@ RSpec.describe Clin::Shell do
       expect { subject.overwrite?('some.txt') }.to raise_error(SystemExit)
     end
 
-    it 'ask the user and quit when he reply quit' do
+    it 'ask the user and show diff when he reply diff' do
       expects_scan("Overwrite 'some.txt'? [Ynaqdh]", 'd', 'y')
-      expect(subject).to receive(:show_diff).with('some.txt', 'new_text')
+      expect_any_instance_of(Clin::ShellInteraction::FileConflict)
+        .to receive(:show_diff).with('some.txt', 'new_text')
       result = subject.overwrite?('some.txt') do
         'new_text'
       end

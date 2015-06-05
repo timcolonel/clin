@@ -36,19 +36,8 @@ class Clin::Shell
   # If multiple choices start with the same initial
   # ONLY the first one will be able to be selected using its inital
   def choose(statement, choices, default: nil, allow_initials: false)
-    choices = convert_choices(choices)
-    question = prepare_question(statement, choices, default: default, initials: allow_initials)
-    loop do
-      answer = ask(question, default: default)
-      unless answer.nil?
-        choices.each do |choice, _|
-          if choice.casecmp(answer) == 0 || (allow_initials && choice[0].casecmp(answer[0]) == 0)
-            return choice
-          end
-        end
-      end
-      print_choices_help(choices, allow_initials: allow_initials)
-    end
+    Clin::ShellInteraction::Choose.new(self).run(statement, choices,
+                                                 default: default, allow_initials: allow_initials)
   end
 
   # Expect the user the return yes or no(y/n also works)
@@ -57,24 +46,14 @@ class Clin::Shell
   # @param persist [Boolean] Add "always" to the choices. When all is selected all the following
   # call to yes_or_no with persist: true will return true instead of asking the user.
   def yes_or_no(statement, default: nil, persist: false)
-    options = %w(yes no)
-    if persist
-      return true if @yes_or_no_persist
-      options << 'always'
-    end
-    choice = choose(statement, options, default: default, allow_initials: true)
-    if choice == 'always'
-      choice = 'yes'
-      @yes_or_no_persist = true
-    end
-    choice == 'yes'
+    Clin::ShellInteraction::YesOrNo.new(self).run(statement, default: default, persist: persist)
   end
 
   # Yes or no question defaulted to yes
   # @param options [Hash] Named parameters for yes_or_no
   # @see #yes_or_no
   def yes?(statement, options = {})
-    options[:default] = 'yes'
+    options[:default] = :yes
     yes_or_no(statement, **options)
   end
 
@@ -82,7 +61,7 @@ class Clin::Shell
   # @param options [Hash] Named parameters for yes_or_no
   # @see #yes_or_no
   def no?(statement, options = {})
-    options[:default] = 'no'
+    options[:default] = :no
     yes_or_no(statement, **options)
   end
 
@@ -97,28 +76,7 @@ class Clin::Shell
   # @param block [Block] optional block that give the new content in case of diff
   # @return [Boolean] If the file should be overwritten.
   def file_conflict(filename, default: nil, &block)
-    choices = file_conflict_choices
-    choices = choices.except(:diff) unless block_given?
-    return true if @override_persist
-    loop do
-      result = choose("Overwrite '#{filename}'?", choices, default: default, allow_initials: true)
-      case result
-      when :yes
-        return true
-      when :no
-        return false
-      when :always
-        return @override_persist = true
-      when :quit
-        puts 'Aborting...'
-        fail SystemExit
-      when :diff
-        show_diff(filename, block.call)
-        next
-      else
-        next
-      end
-    end
+    Clin::ShellInteraction::FileConflict.new(self).run(filename, default: default, &block)
   end
 
   # File conflict question defaulted to yes
@@ -135,61 +93,6 @@ class Clin::Shell
     @out.print(statement + ' ')
     @in.gets
   end
-
-  protected def choice_message(choices, default: nil, initials: false)
-    choices = choices.keys.map { |x| x == default ? x.to_s.upcase : x }
-    msg = if initials
-            choices.map { |x| x[0] }.join('')
-          else
-            choices.join(',')
-          end
-    "[#{msg}]"
-  end
-
-  protected def prepare_question(statement, choices, default: nil, initials: false)
-    question = statement.clone
-    question << " #{choice_message(choices, default: default, initials: initials)}"
-  end
-
-  protected def print_choices_help(choices, allow_initials: false)
-    puts 'Choose from:'
-    used_initials = Set.new
-    choices.each do |choice, description|
-      suf = choice.to_s
-      suf += ", #{description}" unless description.blank?
-      line = if allow_initials && !used_initials.include?(choice[0])
-               used_initials << choice[0]
-               "  #{choice[0]} - #{suf}"
-             else
-               "      #{suf}"
-             end
-      puts line
-    end
-  end
-
-  # Convert the choices to a hash with key being the choice and value the description
-  protected def convert_choices(choices)
-    if choices.is_a? Array
-      Hash[*choices.map { |k| [k, ''] }.flatten]
-    elsif choices.is_a? Hash
-      choices
-    end
-  end
-
-  protected def file_conflict_choices
-    {yes: 'Overwrite',
-     no: 'Do not Overwrite',
-     always: 'Override this and all the next',
-     quit: 'Abort!',
-     diff: 'Show the difference',
-     help: 'Show this'}
-  end
-
-  protected def show_diff(old_file, new_content)
-    Tempfile.open(File.basename(old_file)) do |f|
-      f.write new_content
-      f.rewind
-      system %(#{Clin.diff_cmd} "#{old_file}" "#{f.path}")
-    end
-  end
 end
+
+require 'clin/shell_interaction'
