@@ -5,6 +5,8 @@ module Clin::CommandMixin::Core
   extend ActiveSupport::Concern
   included do
     @_arguments = []
+    @_default_priority = 1000
+    @_priority = 0
   end
 
   module ClassMethods # :nodoc:
@@ -13,6 +15,8 @@ module Clin::CommandMixin::Core
     attr_accessor :_abstract
     attr_accessor :_exe_name
     attr_accessor :_skip_options
+    attr_accessor :_default_priority
+    attr_accessor :_priority
 
     # Trigger when a class inherit this class
     # Rest class_attributes that should not be shared with subclass
@@ -23,6 +27,8 @@ module Clin::CommandMixin::Core
       subclass._abstract = false
       subclass._skip_options = false
       subclass._exe_name = @_exe_name
+      subclass._default_priority = @_default_priority.to_f / 2
+      subclass._priority = 0
       super
     end
 
@@ -92,6 +98,29 @@ module Clin::CommandMixin::Core
       "Usage: #{usage}"
     end
 
+    # Priorities this command.
+    # This does not set the priority. It add +value+ to the default priority
+    # The default priority is computed using half of the parent default priority.
+    # e.g.
+    # ```
+    # Parent = Class.new(Clin::Command)
+    # Child1 = Class.new(Parent)
+    # Child2 = Class.new(Parent)
+    # Parent.priority # => 500
+    # Child1.priority # => 250
+    # Child2.priority # => 250
+    # Child2.prioritize
+    # Child2.priority # => 251
+    # ```
+    # When dispatching commands they are sorted by priority
+    def prioritize(value = 1)
+      @_priority = value
+    end
+
+    def priority
+      @_default_priority + @_priority
+    end
+
     # Build the Option Parser object
     # Used to parse the option
     # Useful for regenerating the help as well.
@@ -111,9 +140,7 @@ module Clin::CommandMixin::Core
     end
 
     def default_commands
-      # self.constants.map { |c| self.const_get(c) }
-      # .select { |c| c.is_a?(Class) && (c < Clin::Command) }
-      subcommands
+      subcommands.sort_by(&:priority).reverse
     end
 
     # List the subcommands

@@ -15,25 +15,6 @@ class SimpleCommand < Clin::Command
   end
 end
 
-if __FILE__ == $PROGRAM_NAME
-  SimpleCommand.parse('display "My Message" --echo SOME').run
-  puts
-  puts '=' * 60
-  puts
-  begin
-    SimpleCommand.parse('').run
-  rescue Clin::HelpError => e
-    puts e
-  end
-end
-# $ ruby simple.rb
-# My Message
-# SOME
-#
-# ============================================================
-#
-#   Usage: command display <message> [Options]
-#
-# Options:
-#   -e, --echo ECHO                  Echo some text
-# -h, --help                       Show the help.
+# Run example:
+# SimpleCommand.parse('display "My Message" --echo SOME').run
+# SimpleCommand.parse('').run

@@ -40,53 +40,8 @@ class PrintCommand < DispatchCommand
   end
 end
 
-if __FILE__ == $PROGRAM_NAME
-  Clin::CommandDispatcher.parse('you display "My Message"').run
-  puts
-  puts '=' * 60
-  puts
-  Clin::CommandDispatcher.parse('you print "My Message"').run
-  puts
-  puts '=' * 60
-  puts
-  begin
-    Clin::CommandDispatcher.parse('you -h').run
-  rescue Clin::CommandLineError => e
-    puts e
-  end
-  puts
-  puts '=' * 60
-  puts
-  begin
-    Clin::CommandDispatcher.parse('-h')
-  rescue Clin::CommandLineError => e
-    puts e
-  end
-end
-
-# Output:
-#
-# $ ruby dispatcher.rb
-# I Display: 'My Message'
-#
-# ============================================================
-#
-# I Print: 'My Message'
-#
-# ============================================================
-#
-# Usage: command you <args>... [Options]
-#
-# Options:
-#     -h, --help                       Show the help.
-#
-# Description:
-# YOU print the given message
-#
-#
-# ============================================================
-#
-# Usage:
-#   command you <args>... [Options]
-#   command you display <message> [Options]
-#   command you print <message> [Options]
+# Example of run:
+# Clin::CommandDispatcher.parse('you display "My Message"').run
+# Clin::CommandDispatcher.parse('you print "My Message"').run
+# Clin::CommandDispatcher.parse('you -h').run
+# Clin::CommandDispatcher.parse('-h')
