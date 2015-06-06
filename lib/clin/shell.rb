@@ -16,6 +16,8 @@ class Clin::Shell
   end
 
   # Ask a question
+  # @param statement [String]
+  # @param default [String]
   def ask(statement, default: nil)
     answer = scan(statement)
     if answer.blank?
@@ -31,10 +33,10 @@ class Clin::Shell
   # @param statement [String] Question to ask
   # @param choices [Array] List of choices
   # @param default [String] Default value if the user put blank value.
-  # @param allow_initials [Boolean] Allow the user to reply with only the inital of the choice.
+  # @param allow_initials [Boolean] Allow the user to reply with only the initial of the choice.
   #   (e.g. yes/no => y/n)
   # If multiple choices start with the same initial
-  # ONLY the first one will be able to be selected using its inital
+  # ONLY the first one will be able to be selected using its initial
   def choose(statement, choices, default: nil, allow_initials: false)
     Clin::ShellInteraction::Choose.new(self).run(statement, choices,
                                                  default: default, allow_initials: allow_initials)
@@ -89,9 +91,12 @@ class Clin::Shell
     file_conflict(filename, default: :no, &block)
   end
 
-  protected def scan(statement)
-    @out.print(statement + ' ')
-    @in.gets
+  protected def scan(statement, filter: nil, &block)
+    unless filter.nil?
+      block ||= proc { |s| filter.grep(/^#{Regexp.escape(s)}/) }
+    end
+    Readline.completion_proc = block unless block.nil?
+    Readline.readline(statement + ' ', true)
   end
 end
 

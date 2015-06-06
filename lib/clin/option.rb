@@ -3,24 +3,22 @@ require 'clin'
 # Option container.
 # Prefer the `.option`, `.flag_option`,... class methods than `.add_option Option.new(...)`
 class Clin::Option
-  class << self
-    def parse(name, usage, &block)
-      long = nil
-      short = nil
-      argument = nil
-      desc = []
-      usage.split.each do |segment|
-        if segment.start_with? '--'
-          long, argument = segment.split('=', 2)
-        elsif segment.start_with? '-'
-          short = segment
-        else
-          desc << segment
-        end
+  def self.parse(name, usage, &block)
+    long = nil
+    short = nil
+    argument = nil
+    desc = []
+    usage.split.each do |segment|
+      if segment.start_with? '--'
+        long, argument = segment.split('=', 2)
+      elsif segment.start_with? '-'
+        short = segment
+      else
+        desc << segment
       end
-      argument = false if argument.nil?
-      new(name, desc.join(' '), short: short, long: long, argument: argument, &block)
     end
+    argument = false if argument.nil?
+    new(name, desc.join(' '), short: short, long: long, argument: argument, &block)
   end
 
   attr_accessor :name, :description, :optional_argument, :block, :type, :default
