@@ -5,7 +5,8 @@ RSpec.describe Clin::ShellInteraction::Choose do
   subject { Clin::ShellInteraction::Choose.new(shell) }
 
   def expects_scan(message, *outputs)
-    expect(shell).to receive(:scan).with(message).and_return(*outputs).exactly(outputs.size).times
+    expect(shell)
+      .to receive(:scan).with(message, any_args).and_return(*outputs).exactly(outputs.size).times
   end
 
   describe '#choice_message' do

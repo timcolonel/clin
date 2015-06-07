@@ -18,8 +18,9 @@ class Clin::Shell
   # Ask a question
   # @param statement [String]
   # @param default [String]
-  def ask(statement, default: nil)
-    answer = scan(statement)
+  # @param autocomplete [Array|Proc] Filter for autocomplete
+  def ask(statement, default: nil, autocomplete: nil)
+    answer = scan(statement, autocomplete: autocomplete)
     if answer.blank?
       default
     else
@@ -91,11 +92,18 @@ class Clin::Shell
     file_conflict(filename, default: :no, &block)
   end
 
-  protected def scan(statement, filter: nil, &block)
-    unless filter.nil?
-      block ||= proc { |s| filter.grep(/^#{Regexp.escape(s)}/) }
+  # Prompt the statement to the user and return his reply.
+  # @param statement [String]
+  # @param autocomplete [Array|Block]
+  protected def scan(statement, autocomplete: nil)
+    unless autocomplete.nil?
+      Readline.completion_proc = if autocomplete.is_a? Proc
+                                   autocomplete
+                                 else
+                                   proc { |s| autocomplete.grep(/^#{Regexp.escape(s)}/) }
+                                 end
     end
-    Readline.completion_proc = block unless block.nil?
+    Readline.completion_append_character = nil
     Readline.readline(statement + ' ', true)
   end
 end

@@ -2,7 +2,7 @@ require 'clin'
 
 RSpec.describe Clin::Shell do
   def expects_scan(message, *outputs)
-    expect(subject).to receive(:scan).with(message).and_return(*outputs).exactly(outputs.size).times
+    expect(subject).to receive(:scan).with(message, any_args).and_return(*outputs).exactly(outputs.size).times
   end
 
   describe '#ask' do

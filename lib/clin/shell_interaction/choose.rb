@@ -6,7 +6,7 @@ class Clin::ShellInteraction::Choose < Clin::ShellInteraction
     choices = convert_choices(choices)
     question = prepare_question(statement, choices, default: default, initials: allow_initials)
     loop do
-      answer = @shell.ask(question, default: default)
+      answer = @shell.ask(question, default: default, autocomplete: choices.keys)
       unless answer.nil?
         choices.each do |choice, _|
           if choice.casecmp(answer) == 0 || (allow_initials && choice[0].casecmp(answer[0]) == 0)
