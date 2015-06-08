@@ -9,5 +9,10 @@ gemfile:
 
 matrix:
 
+after_success:
+  - ruby benchmarks/bench.rb
+
 notifications:
   email: false
+
+
