@@ -17,11 +17,6 @@ class ListCommand < Clin::Command
     end
   end
 end
-
-if __FILE__ == $PROGRAM_NAME
-  ListCommand.parse('--echo "Message 1" --echo "Message 2"').run
-  puts
-  puts '=' * 60
-  puts
-  ListCommand.parse('--echo "Message 3" --echo "Message 4" -ll').run
-end
+# Use examples:
+# ListCommand.parse('--echo "Message 1" --echo "Message 2"').run
+# ListCommand.parse('--echo "Message 3" --echo "Message 4" -ll').run
