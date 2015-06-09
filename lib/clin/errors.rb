@@ -4,16 +4,32 @@ module Clin
   Error = Class.new(RuntimeError)
 
   # Error cause by the user input(when parsing command)
-  CommandLineError = Class.new(Error)
+  class CommandLineError < Error
+    def self.severity(value = @severity)
+      @severity = value
+      @severity ||= 1
+    end
+  end
 
   # Error when the help needs to be shown
-  HelpError = Class.new(CommandLineError)
+  class HelpError < CommandLineError
+    def initialize(command)
+      if command.class == Class && command < Clin::Command
+        super(command.help)
+        @command = command
+      else
+        super(command)
+      end
+    end
+  end
 
   # Error when an positional argument is wrong
   ArgumentError = Class.new(CommandLineError)
 
   # Error when a fixed argument is not matched
-  class FixedArgumentError < ArgumentError
+  class RequiredArgumentError < ArgumentError
+    severity 100
+
     # Create a new FixedArgumentError
     # @param argument [String] Name of the fixed argument
     # @param got [String] What argument was in place of the fixed argument
@@ -32,5 +48,32 @@ module Clin
   end
 
   # Error when a option is wrong
-  OptionError = Class.new(CommandLineError)
+  class OptionError < CommandLineError
+    def initialize(message, option)
+      super(message)
+      @option = option
+    end
+  end
+
+  class UnknownOptionError < OptionError
+    def initialize(option)
+      message = "Unknown option #{option}"
+      super(message, option)
+    end
+  end
+
+  class OptionUnexpectedArgumentError < OptionError
+    def initialize(option, value)
+      @value = value
+      message = "Unexpected argument '#{value}' for option #{option}"
+      super message, option
+    end
+  end
+
+  class MissingOptionArgumentError < OptionError
+    def initialize(option)
+      message = "Missing argument for option #{option}"
+      super(message, option)
+    end
+  end
 end

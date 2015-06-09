@@ -1,6 +1,5 @@
 require 'active_support'
 require 'active_support/core_ext'
-require 'optparse'
 require 'readline'
 require 'clin/version'
 

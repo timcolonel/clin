@@ -63,7 +63,7 @@ class Clin::Argument
   def ensure_fixed(args)
     [*args].each do |arg|
       next if arg == @name
-      fail Clin::FixedArgumentError, @name, arg
+      fail Clin::RequiredArgumentError, @name, arg
     end
   end
 
@@ -77,7 +77,7 @@ class Clin::Argument
     if @variable
       fail Clin::MissingArgumentError, @name
     else
-      fail Clin::FixedArgumentError, @name
+      fail Clin::RequiredArgumentError, @name
     end
   end
 

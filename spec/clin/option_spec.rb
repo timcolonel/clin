@@ -19,7 +19,7 @@ RSpec.describe Clin::Option do
     end
   end
 
-  describe '#extract' do
+  describe '#trigger' do
     let(:out) { Hash.new }
     let(:opts) { double(:opts) }
     let(:value) { 'some' }
@@ -32,20 +32,18 @@ RSpec.describe Clin::Option do
     context 'when initializing with name' do
       subject { Clin::Option.new(:my_option, 'This is my option!') }
       before do
-        subject.register(opts, out)
+        subject.trigger(opts, out, value)
       end
-      it { expect(opts).to have_received(:on).once }
       it { expect(out[:my_option]).to eq(value) }
     end
 
     context 'when initializing with block' do
-      let(:block) { proc { |_opts, out, value| out[:some] = value } }
+      let(:block) { proc { |_opts, out, value| out[:some] = "new val #{value}" } }
       subject { Clin::Option.new(:my_option, 'This is my option!', &block) }
       before do
-        subject.register(opts, out)
+        subject.trigger(opts, out, value)
       end
-      it { expect(opts).to have_received(:on).once }
-      it { expect(out[:some]).to eq(value) }
+      it { expect(out[:some]).to eq("new val #{value}") }
 
     end
   end

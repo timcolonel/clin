@@ -22,22 +22,6 @@ module Clin::CommandMixin::Options
     attr_accessor :options
     attr_accessor :general_options
 
-    # Add an option
-    # @param args list of arguments.
-    #   * First argument must be the name if no block is given.
-    #     It will set automatically read the value into the hash with  +name+ as key
-    #   * The remaining arguments are OptionsParser#on arguments
-    # ```
-    #   option :require, '-r', '--require [LIBRARY]', 'Require the library'
-    #   option '-h', '--helper', 'Show the help' do
-    #     puts opts
-    #     exit
-    #   end
-    # ```
-    def opt_option(*args, &block)
-      add_option Clin::Option.new(*args, &block)
-    end
-
     # Add an option.
     # Helper method that just create a new Clin::Option with the argument then call add_option
     # ```
@@ -105,16 +89,17 @@ module Clin::CommandMixin::Options
 
     # To be called inside OptionParser block
     # Extract the option in the command line using the OptionParser and map it to the out map.
-    # @param opts [OptionParser]
-    # @param out [Hash] Where the options shall be extracted
-    def register_options(opts, out)
+    # @return [Hash] Where the options shall be extracted
+    def option_defaults
+      out = {}
       @options.each do |option|
-        option.register(opts, out)
+        option.load_default(out)
       end
 
       @general_options.each do |_cls, option|
-        option.class.register_options(opts, out)
+        out.merge! option.class.option_defaults
       end
+      out
     end
 
     # Call #execute on each of the general options.
@@ -129,6 +114,27 @@ module Clin::CommandMixin::Options
       general_options.each do |_cls, gopts|
         gopts.execute(options)
       end
+    end
+
+    def find(value)
+      find_by(name: value)
+    end
+
+    def find_by(hash)
+      key, value = hash.first
+      self.options.select { |x| x.send(key) == value }.first
+    end
+
+    def option_help
+      out = ''
+      options.each do |option|
+        out << "  #{option.banner}\n"
+      end
+
+      general_options.each do |cls, _|
+        out << cls.option_help
+      end
+      "#{out}\n"
     end
   end
 end

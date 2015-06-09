@@ -1,5 +1,6 @@
 require 'clin'
 require 'clin/general_option'
+
 # Help option class
 # Add the help option to you command
 # ```

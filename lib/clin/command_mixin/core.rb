@@ -121,24 +121,6 @@ module Clin::CommandMixin::Core
       @_default_priority + @_priority
     end
 
-    # Build the Option Parser object
-    # Used to parse the option
-    # Useful for regenerating the help as well.
-    def option_parser(out = {})
-      OptionParser.new do |opts|
-        opts.banner = banner
-        opts.separator ''
-        opts.separator 'Options:'
-        register_options(opts, out)
-        dispatch_doc(opts)
-        unless @description.blank?
-          opts.separator "\nDescription:"
-          opts.separator @description
-        end
-        opts.separator ''
-      end
-    end
-
     def default_commands
       subcommands.sort_by(&:priority).reverse
     end
@@ -147,6 +129,15 @@ module Clin::CommandMixin::Core
     # The subcommands are all the Classes inheriting this one that are not set to abstract
     def subcommands
       subclasses.reject(&:abstract?)
+    end
+
+    def help
+      out = ''
+      out << banner << "\n\n"
+      out << "Options: \n"
+      out << option_help
+      out << "Description:\n#{description}\n" unless description.blank?
+      out << "\n"
     end
   end
 end

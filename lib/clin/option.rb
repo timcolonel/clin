@@ -53,21 +53,15 @@ class Clin::Option
     @default = default
   end
 
-  # Register the option to the Option Parser
-  # @param opts [OptionParser]
-  # @param out [Hash] Out options mapping
-  def register(opts, out)
-    load_default(out)
+  def trigger(opts, out, value)
+    value = cast(value)
     if @block.nil?
-      opts.on(*option_parser_arguments) do |value|
-        on(value, out)
-      end
+      on(value, out)
     else
-      opts.on(*option_parser_arguments) do |value|
-        block.call(opts, out, value)
-      end
+      block.call(opts, out, value)
     end
   end
+
 
   # Default option short name.
   # ```
@@ -153,6 +147,10 @@ class Clin::Option
     @argument.eql? false
   end
 
+  def argument_optional?
+    @optional_argument
+  end
+
   # Init the output Hash with the default values. Must be called before parsing.
   # @param out [Hash]
   def load_default(out)
@@ -186,5 +184,21 @@ class Clin::Option
       out += " #{arg}"
     end
     out
+  end
+
+  def banner
+    args = [short, long_argument, description]
+    args.compact.join(' ')
+  end
+
+  def cast(str)
+    return str if type.nil?
+    if type == Integer
+      Integer(str)
+    elsif type == Float
+      Float(str)
+    else
+      str
+    end
   end
 end

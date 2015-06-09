@@ -57,7 +57,7 @@ RSpec.describe Clin::CommandDispatcher do
 
     context 'when first command return FixedArgumentError' do
       before do
-        allow(cmd1).to receive(:parse) { fail Clin::FixedArgumentError, :some }
+        allow(cmd1).to receive(:parse) { fail Clin::RequiredArgumentError, :some }
         subject.parse(args)
       end
       it { expect(cmd1).to have_received(:parse).with(args, fallback_help: false) }

@@ -9,6 +9,8 @@ class SimpleCommand < Clin::Command
   option :echo, 'Echo some text'
   general_option Clin::HelpOptions
 
+  description 'Simple command that print stuff!'
+
   def run
     puts @params[:message]
     puts @params[:echo]
@@ -16,5 +18,9 @@ class SimpleCommand < Clin::Command
 end
 
 # Run example:
-# SimpleCommand.parse('display "My Message" --echo SOME').run
-# SimpleCommand.parse('').run
+# SimpleCommand.parse('display "My Message" -e SOME').run
+begin
+  SimpleCommand.parse('').run
+rescue Clin::HelpError => e
+  puts e
+end

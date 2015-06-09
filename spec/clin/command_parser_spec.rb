@@ -12,10 +12,15 @@ RSpec.describe Clin::CommandParser do
     subject { Clin::CommandParser.new(@command, []) }
 
     it 'raise argument when option value is missing' do
-      expect { subject.parse_options(%w(--name)) }.to raise_error(OptionParser::MissingArgument)
+      subject.parse_options(%w(--name))
+      expect(subject.valid?).to be false
+      expect(subject.errors.first).to be_a(Clin::MissingOptionArgumentError)
     end
-    it 'raise error when unknown option' do
-      expect { subject.parse_options(%w(--other)) }.to raise_error(Clin::OptionError)
+
+    it 'add error when unknown option' do
+      subject.parse_options(%w(--other))
+      expect(subject.errors.size).to be 1
+      expect(subject.errors.first).to be_a(Clin::OptionError)
     end
 
     it { expect(subject.parse_options(%w(--name MyName))).to eq(name: 'MyName') }
@@ -25,7 +30,7 @@ RSpec.describe Clin::CommandParser do
 
     it { expect(subject.parse_options(%w(-v))).to eq(verbose: true) }
 
-    it { expect(subject.parse_options(%w(--echo))).to eq(echo: nil) }
+    it { expect(subject.parse_options(%w(--echo))).to eq(echo: true) }
     it { expect(subject.parse_options(%w(-e EchoThis))).to eq(echo: 'EchoThis') }
   end
 
@@ -39,14 +44,21 @@ RSpec.describe Clin::CommandParser do
     subject { Clin::CommandParser.new(@command, []) }
 
     it 'raise argument when fixed in different' do
-      expect { subject.parse_arguments(%w(other val opt)) }.to raise_error(Clin::CommandLineError)
+      subject.parse_arguments(%w(other val opt))
+      expect(subject.valid?).to be false
+      expect(subject.errors.first).to be_a Clin::CommandLineError
     end
+
     it 'raise error when too few arguments' do
-      expect { subject.parse_arguments(['fix']) }.to raise_error(Clin::CommandLineError)
+      subject.parse_arguments(%w(fix))
+      expect(subject.valid?).to be false
+      expect(subject.errors.first).to be_a Clin::CommandLineError
     end
+
     it 'raise error when too much argument' do
-      expect { subject.parse_arguments(%w(other val opt more)) }
-        .to raise_error(Clin::CommandLineError)
+      subject.parse_arguments(%w(other val opt more))
+      expect(subject.valid?).to be false
+      expect(subject.errors.first).to be_a Clin::CommandLineError
     end
 
     it 'map arguments' do
@@ -55,43 +67,6 @@ RSpec.describe Clin::CommandParser do
 
     it 'opt argument is nil when not provided' do
       expect(subject.parse_arguments(%w(fix val))).to eq(fix: 'fix', var: 'val')
-    end
-  end
-
-  describe '#skipped_options' do
-    def skipped_options(argv)
-      Clin::CommandParser.new(@command, argv).skipped_options
-    end
-
-    before :all do
-      @command = Class.new(Clin::Command)
-      @command.skip_options true
-    end
-
-    context 'when all options should be skipped' do
-      it { expect(skipped_options(%w(pos arg))).to eq([]) }
-
-      it { expect(skipped_options(%w(pos arg --ignore -t))).to eq(%w(--ignore -t)) }
-
-      it { expect(skipped_options(%w(pos arg --ignore value -t))).to eq(%w(--ignore value -t)) }
-
-    end
-    context 'when option are define they should not be skipped' do
-      before :all do
-        @command.flag_option :verbose, 'Verbose'
-      end
-
-      it { expect(skipped_options(%w(pos arg --ignore value -t -v))).to eq(%w(--ignore value -t)) }
-
-      it do
-        expect(skipped_options(%w(pos arg --verbose --ignore value -t)))
-          .to eq(%w(--ignore value -t))
-      end
-
-      it do
-        expect(skipped_options(%w(pos arg --ignore value --verbose -t)))
-          .to eq(%w(--ignore value -t))
-      end
     end
   end
 
@@ -132,12 +107,14 @@ RSpec.describe Clin::CommandParser do
     context 'when using commands' do
       let(:cmd1) { double(:command_mixin) }
       let(:cmd2) { double(:command_mixin) }
+      let(:dispatcher) { double(:dispatcher, parse: true) }
       before do
         @command.dispatch :args, commands: [cmd1, cmd2]
-        allow_any_instance_of(Clin::CommandDispatcher).to receive(:initialize)
       end
+
       it 'call the command dispatcher with the right arguments' do
-        expect_any_instance_of(Clin::CommandDispatcher).to receive(:initialize).once.with([cmd1, cmd2])
+        expect(Clin::CommandDispatcher)
+          .to receive(:new).once.with([cmd1, cmd2]).and_return(dispatcher)
         subject.redispatch(remote: 'remote', args: args)
       end
     end
@@ -146,19 +123,18 @@ RSpec.describe Clin::CommandParser do
       let(:new_message) { Faker::Lorem.sentence }
       before do
         @command.dispatch :args
-        allow_any_instance_of(Clin::CommandDispatcher).to receive(:initialize)
+        allow_any_instance_of(Clin::CommandDispatcher).to receive(:new)
         allow_any_instance_of(Clin::CommandDispatcher).to receive(:parse) do
           fail Clin::HelpError, 'Dispatcher error'
         end
-        allow(@command).to receive(:option_parser).and_return(new_message)
+        allow(@command).to receive(:help).and_return(new_message)
       end
       it do
         expect { subject.redispatch(remote: 'remote', args: args) }
           .to raise_error(Clin::HelpError)
       end
       it do
-        expect { subject.redispatch(remote: 'remote', args: args) }
-          .to raise_error(new_message)
+        expect { subject.redispatch(remote: 'remote', args: args) }.to raise_error(new_message)
       end
     end
   end

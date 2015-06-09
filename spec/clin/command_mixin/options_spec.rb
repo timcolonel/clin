@@ -42,26 +42,4 @@ RSpec.describe Clin::CommandMixin::Options do
     it { expect(subject.general_options.size).to be 1 }
     it { expect(subject.general_options.values.first).to eq(true) }
   end
-
-  describe '#register_options' do
-    subject { new_subject }
-    let(:opt1) { double(:option, register: true) }
-    let(:opt2) { double(:option, register: true) }
-    let(:g_opt_cls) { double(:general_option_class, register_options: true) }
-    let(:g_opt) { double(:general_option, class: g_opt_cls) }
-    let(:opts) { double(:options) }
-    let(:out) { double(:out) }
-    before do
-      subject.add_option(opt1)
-      subject.add_option(opt2)
-      subject.general_options = {g_opt_cls => g_opt}
-
-      subject.register_options(opts, out)
-    end
-
-    it { expect(opt1).to have_received(:register).with(opts, out) }
-    it { expect(opt2).to have_received(:register).with(opts, out) }
-    it { expect(g_opt_cls).to have_received(:register_options).with(opts, out) }
-
-  end
 end
