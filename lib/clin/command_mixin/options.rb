@@ -116,13 +116,13 @@ module Clin::CommandMixin::Options
       end
     end
 
-    def find(value)
-      find_by(name: value)
+    def find_option(value)
+      find_option_by(name: value)
     end
 
-    def find_by(hash)
+    def find_option_by(hash)
       key, value = hash.first
-      self.options.select { |x| x.send(key) == value }.first
+      options.find { |x| x.send(key) == value }
     end
 
     def option_help

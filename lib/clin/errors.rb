@@ -55,6 +55,7 @@ module Clin
     end
   end
 
+  # Error when undefined options are found in argv
   class UnknownOptionError < OptionError
     def initialize(option)
       message = "Unknown option #{option}"
@@ -62,6 +63,7 @@ module Clin
     end
   end
 
+  # Error when a flag option has an unexpected argument
   class OptionUnexpectedArgumentError < OptionError
     def initialize(option, value)
       @value = value
@@ -70,6 +72,7 @@ module Clin
     end
   end
 
+  # When a option is missing it's required argument
   class MissingOptionArgumentError < OptionError
     def initialize(option)
       message = "Missing argument for option #{option}"

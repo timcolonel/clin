@@ -62,7 +62,6 @@ class Clin::Option
     end
   end
 
-
   # Default option short name.
   # ```
   # :verbose => '-v'

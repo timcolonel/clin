@@ -3,7 +3,6 @@ $LOAD_PATH.push File.expand_path('../..', __FILE__)
 $LOAD_PATH.push File.expand_path('../../lib', __FILE__)
 require 'clin'
 
-
 Benchmark.ips do |x|
   x.report('simple') do
     require 'examples/simple'

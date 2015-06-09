@@ -6,7 +6,9 @@ RSpec.describe 'list_option.rb' do
   it { expect(ListCommand.parse('').params).to eq(echo: [], line: 0) }
   it { expect(ListCommand.parse('--echo msg').params).to eq(echo: ['msg'], line: 0) }
   it { expect(ListCommand.parse('--line').params).to eq(echo: [], line: 1) }
-  it { expect(ListCommand.parse('--line --line').params).to eq(echo: [], line: 2) }
+  it {
+    expect(ListCommand.parse('--line --line').params).to eq(echo: [], line: 2)
+  }
   it {
     expect(ListCommand.parse('-lll').params).to eq(echo: [], line: 3)
   }

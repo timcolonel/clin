@@ -30,6 +30,7 @@ end
 
 require 'clin/command_mixin'
 require 'clin/command'
+require 'clin/option_parser'
 require 'clin/command_parser'
 require 'clin/general_option'
 require 'clin/command_dispatcher'

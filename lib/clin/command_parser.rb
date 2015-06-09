@@ -2,6 +2,9 @@ require 'clin'
 
 # Command parser
 class Clin::CommandParser
+  # List of errors that have occurred during the parsing
+  attr_reader :errors
+
   # Create the command parser
   # @param command_cls [Class<Clin::Command>] Command that must be matched
   # @param argv [Array<String>] List of CL arguments
@@ -40,75 +43,13 @@ class Clin::CommandParser
     obj
   end
 
-  LONG_OPTION_REGEX = /\A(?<name>--[^=]*)(?:=(?<value>.*))?/m
-  SHORT_OPTION_REGEX = /\A(?<name>-.)(?<value>(=).*|.+)?/m
-
   def parse_options(argv)
-    arguments = []
-    while (arg = argv.shift)
-      case arg
-      when LONG_OPTION_REGEX
-        name = Regexp.last_match[:name]
-        value = Regexp.last_match[:value]
-        option = @command.find_by(long: name)
-        parse_option(option, name, value, argv, false)
-      when SHORT_OPTION_REGEX
-        name = Regexp.last_match[:name]
-        value = Regexp.last_match[:value]
-        option = @command.find_by(short: name)
-        parse_option(option, name, value, argv, true)
-      else
-        arguments << arg
-      end
-    end
-    argv.replace(arguments)
+    parser = Clin::OptionParser.new(@command, argv)
+    @options.merge! parser.parse
+    @skipped_options = parser.skipped_options
+    @errors += parser.errors
+    argv.replace(parser.arguments)
     @options
-  end
-
-  def parse_option(option, name, value, argv, short)
-    if option.nil?
-      handle_unknown_option(name, value, argv)
-      return
-    end
-    if option.flag?
-      if value.nil?
-        option.trigger(self, @options, true)
-      elsif not short
-        add_error Clin::OptionUnexpectedArgumentError.new(option, value)
-      else
-        option.trigger(self, @options, true)
-        # -abc multiple flag options
-        value.each_char do |s|
-          option = @command.find_by(short: "-#{s}")
-          if option && !option.flag?
-            message = "Cannot combine short options that expect argument: #{option}"
-            add_error Clin::OptionError.new(message, option)
-            return
-          end
-          parse_option(option, "-#{s}", nil, [], true)
-        end
-      end
-      return
-    end
-    if value.nil? && argv.any? && !argv.first.start_with?('-')
-      value = argv.shift
-    end
-    if value.nil? && !option.argument_optional?
-      add_error Clin::MissingOptionArgumentError.new(option)
-    end
-    value ||= true
-    option.trigger(self, @options, value)
-  end
-
-  def handle_unknown_option(name, value, argv)
-    unless @command.skip_options?
-      add_error Clin::UnknownOptionError.new(name)
-      return
-    end
-    if value.nil? && argv.any? && !argv.first.start_with?('-')
-      value = argv.shift
-    end
-    @skipped_options += [name, value]
   end
 
   def add_error(err)
@@ -149,10 +90,6 @@ class Clin::CommandParser
     args = prefix.split + args unless prefix.nil?
     args += params[:skipped_options] if @command.skip_options?
     args
-  end
-
-  def errors
-    @errors
   end
 
   def valid?
