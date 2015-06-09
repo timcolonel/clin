@@ -113,9 +113,7 @@ class Clin::OptionParser
       add_error Clin::UnknownOptionError.new(name)
       return
     end
-    if value.nil? && @argv.any? && !@argv.first.start_with?('-')
-      value = @argv.shift
-    end
+    value = complete(value)
     @skipped_options += [name, value]
   end
 
