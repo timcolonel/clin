@@ -1,8 +1,9 @@
 # Clin
-[![Build Status](https://travis-ci.org/timcolonel/clin.svg?branch=master)](https://travis-ci.org/timcolonel/clin)
-[![Coverage Status](https://coveralls.io/repos/timcolonel/clin/badge.svg?branch=master)](https://coveralls.io/r/timcolonel/clin?branch=master)
-[![Code Climate](https://codeclimate.com/github/timcolonel/clin/badges/gpa.svg)](https://codeclimate.com/github/timcolonel/clin)
-[![Inline docs](http://inch-ci.org/github/timcolonel/clin.svg?branch=master)](http://inch-ci.org/github/timcolonel/clin)
+[![Gem](https://img.shields.io/gem/v/clin.svg?style=flat-square)](http://rubygems.org/gems/clin)
+[![Build Status](https://travis-ci.org/timcolonel/clin.svg?branch=master&style=flat-square)](https://travis-ci.org/timcolonel/clin)
+[![Test Coverage](https://codeclimate.com/github/timcolonel/clin/badges/coverage.svg?style=flat-square)](https://codeclimate.com/github/timcolonel/clin/coverage)
+[![Code Climate](https://codeclimate.com/github/timcolonel/clin/badges/gpa.svg?style=flat-square)](https://codeclimate.com/github/timcolonel/clin)
+[![Inline docs](http://inch-ci.org/github/timcolonel/clin.svg?branch=master&style=flat-square)](http://inch-ci.org/github/timcolonel/clin)
 
 Clin is Command Line Interface library that provide an clean api for complex command configuration.
 The way Clin is design allow a command defined by the user to be called via the command line as well as directly in the code without any additional configuration
