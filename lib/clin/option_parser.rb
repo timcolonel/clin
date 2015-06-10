@@ -6,9 +6,16 @@ class Clin::OptionParser
   LONG_OPTION_REGEX = /\A(?<name>--[^=]*)(?:=(?<value>.*))?/m
   SHORT_OPTION_REGEX = /\A(?<name>-.)(?<value>(=).*|.+)?/m
 
+  # List of arguments(i.e. Argv segments that are not options)
   attr_reader :arguments
+
+  # List of errors encountered
   attr_reader :errors
+
+  # Parsed options are store here
   attr_reader :options
+
+  # Any option skipped(if the command allow it) will be listed in here
   attr_reader :skipped_options
 
   def initialize(command, argv)
@@ -21,13 +28,24 @@ class Clin::OptionParser
     @skipped_options = []
   end
 
+  # Parse the argument for the command.
+  # @return [Hash] return the options parsed
+  # Options can also be accessed with #options
+  # ```
+  # # Suppose verbose and opt are defined option for the command.
+  # parser = OptionParser.new(command, %w(arg1 arg2 -v --opt val))
+  # parser.parse #=> {verbose: true, opt: 'val'}
+  # Get the arguments
+  # parser.argv # => ['arg1', 'arg2']
+  # ```
   def parse
     while parse_next
     end
     @options
   end
 
-  # Extract the option
+  # Fetch the next next argument and parse the option or store it as an argument
+  # @return [Boolean] true if it parsed anything, false if there are no more argument to parse
   def parse_next
     return false if @argv.empty?
     case (arg = @argv.shift)
@@ -63,13 +81,18 @@ class Clin::OptionParser
     parse_option(option, name, value, true)
   end
 
+  # Parse the given option.
+  # @param option [Clin::Option]
+  # @param name [String] name it was given in the command
+  # @param value [String] value of the option
+  # If the value is nil and the option allow argument it will try to use the next argument
   def parse_option(option, name, value, short)
     return handle_unknown_option(name, value) if option.nil?
     return parse_flag_option(option, value, short) if option.flag?
 
     value = complete(value)
     if value.nil? && !option.argument_optional?
-      add_error Clin::MissingOptionArgumentError.new(option)
+      return add_error Clin::MissingOptionArgumentError.new(option)
     end
     value ||= true
     option.trigger(self, @options, value)
@@ -88,16 +111,25 @@ class Clin::OptionParser
     end
   end
 
+  # Parse a flag option(No argument)
+  # Add [OptionUnexpectedArgumentError] If value is defined and the long version was used.
+  # Short flag option can be merged together(i.e these are equivalent: -abc, -a -b -c)
+  # In that case the value will be 'bc'. It will then try to parse b and c as flag options.
   def parse_flag_option(option, value, short)
     return option.trigger(self, @options, true) if value.nil?
     unless short # Short can also have the format -abc
-      add_error Clin::OptionUnexpectedArgumentError.new(option, value)
-      return
+      return add_error Clin::OptionUnexpectedArgumentError.new(option, value)
     end
 
     option.trigger(self, @options, true)
     # The value is expected to be other flag options
-    value.each_char do |s|
+    parse_compact_flag_options(value)
+  end
+
+  # Parse compact flag_options(e.g. For -abc it will be called with 'bc')
+  # @param options [String] List of options where each char should correspond to a short option
+  def parse_compact_flag_options(options)
+    options.each_char do |s|
       option = @command.find_option_by(short: "-#{s}")
       if option && !option.flag?
         message = "Cannot combine short options that expect argument: #{option}"
@@ -108,6 +140,10 @@ class Clin::OptionParser
     end
   end
 
+  # Handle the case where the option was not defined in the command.
+  # @param name [String] name used in the command.
+  # @param value [String] Value of the option if applicable.
+  # Add [UnknownOptionError] if the command doesn't allow unknown options.
   def handle_unknown_option(name, value)
     unless @command.skip_options?
       add_error Clin::UnknownOptionError.new(name)
