@@ -104,4 +104,15 @@ RSpec.describe Clin::Text do
       expect(subject.lines).to eq(["  #{line}", "  ***#{line}", "  #{line}"])
     end
   end
+
+  describe '#to_s' do
+    let (:line1) { Faker::Lorem::sentence }
+    let (:line2) { Faker::Lorem::sentence }
+
+    it 'join line with \n' do
+      subject.line line1
+      subject.line line2
+      expect(subject.to_s).to eq("#{line1}\n#{line2}\n")
+    end
+  end
 end

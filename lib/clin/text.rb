@@ -96,7 +96,7 @@ class Clin::Text
   # Join the lines together to form the output
   # @return [String]
   def to_s
-    "#{@_lines.join('\n')}\n"
+    "#{@_lines.join("\n")}\n"
   end
 
   # Process the indent.
@@ -104,5 +104,81 @@ class Clin::Text
   # @return [String.]
   protected def compute_indent(indent)
     indent.is_a?(Integer) ? ' ' * indent : indent
+  end
+end
+
+# Table text builder
+class Clin::Text::Table
+  def initialize(col_delim = ' | ', row_delim: '-', outside_border: false, &block)
+    @rows = []
+    @header = []
+    @column_length = {}
+    @col_delim = col_delim
+    @row_delim = row_delim
+    @outside_border = outside_border
+    block.call(self)
+  end
+
+  def row(*cells)
+    process_columns(cells)
+    @rows << cells
+  end
+
+  def header(*cells)
+    process_columns(cells)
+    @header = cells
+  end
+
+  def separator
+    @rows << nil
+  end
+
+  def to_s
+    puts @column_length
+    lines = []
+    lines << delimiter_row(false) if @outside_border
+    if @header.any?
+      line = row_to_s(@header)
+      lines << line
+      lines << delimiter_row
+    end
+    lines += @rows.map { |row| row_to_s(row) }
+    lines << delimiter_row(false) if @outside_border
+    "#{lines.join("\n")}\n"
+  end
+
+  def row_to_s(row)
+    return delimiter_row if row.nil?
+    out = []
+    @column_length.size.times.each do |i|
+      cell = row[i] || ''
+      out << cell_to_s(cell, @column_length[i])
+    end
+    out = out.join(@col_delim)
+    out = "#{@col_delim}#{out}#{@col_delim}" if @outside_border
+    out
+  end
+
+  def cell_to_s(cell, length)
+    format("%-#{length}s", cell)
+  end
+
+  def delimiter_row(inc_col_delim = true)
+    line = []
+    @column_length.size.times.each do |i|
+      line << @row_delim * @column_length[i]
+    end
+    col_delim = inc_col_delim ? @col_delim : (@row_delim * @col_delim.size)
+    out = line.join(col_delim)
+    out = "#{@col_delim}#{out}#{@col_delim}" if @outside_border
+    out
+  end
+
+  protected def process_columns(cells)
+    cells.flatten!
+    cells.each_with_index do |cell, i|
+      @column_length[i] ||= 0
+      @column_length[i] = [cell.length, @column_length[i]].max
+    end
   end
 end

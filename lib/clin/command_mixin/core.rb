@@ -132,12 +132,16 @@ module Clin::CommandMixin::Core
     end
 
     def help
-      out = ''
-      out << banner << "\n\n"
-      out << "Options: \n"
-      out << option_help
-      out << "Description:\n#{description}\n" unless description.blank?
-      out << "\n"
+      Clin::Text.new do |t|
+        t.line banner
+        t.blank
+        t.line 'Options:'
+        t.text option_help, indent: 2
+        unless description.blank?
+          t.line 'Description:'
+          t.line description, indent: 2
+        end
+      end
     end
   end
 end

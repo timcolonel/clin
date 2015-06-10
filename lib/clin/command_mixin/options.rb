@@ -126,15 +126,15 @@ module Clin::CommandMixin::Options
     end
 
     def option_help
-      out = ''
-      options.each do |option|
-        out << "  #{option.banner}\n"
-      end
+      Clin::Text.new do |t|
+        options.each do |option|
+          t.line option.banner
+        end
 
-      general_options.each do |cls, _|
-        out << cls.option_help
+        general_options.each do |cls, _|
+          t.text cls.option_help
+        end
       end
-      "#{out}\n"
     end
   end
 end

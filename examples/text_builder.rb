@@ -24,3 +24,15 @@ text = Clin::Text.new do |t|
   t.lines values, indent: '*** '
 end
 puts text
+
+table = Clin::Text::Table.new outside_border: true do |t|
+  t.header %w(First Last Email)
+
+  t.row %w(Timothee Guerin timothee.guerin@outlook.com)
+  t.row %w(Some Guy Some.Guy@outlook.com)
+
+  t.separator
+
+  t.row %w(VeryLongFirstName Guy Some.Other@outlook.com)
+end
+puts table

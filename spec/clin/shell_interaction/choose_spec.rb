@@ -51,4 +51,25 @@ RSpec.describe Clin::ShellInteraction::Choose do
       expect(subject.run('Where are you from?', countries)).to eq('france')
     end
   end
+
+  describe '#choice_help' do
+    let(:choices) { {yes: 'You want it!', no: "No you don't!", yeeahno: "I can't make up my mind!"} }
+    it 'get help without initials' do
+      expect(subject.choice_help(choices).to_s).to eq <<help
+Choose from:
+  yes, You want it!
+  no, No you don't!
+  yeeahno, I can't make up my mind!
+help
+    end
+
+    it 'get help with initials' do
+      expect(subject.choice_help(choices, allow_initials: true).to_s).to eq <<help
+Choose from:
+  y - yes, You want it!
+  n - no, No you don't!
+      yeeahno, I can't make up my mind!
+help
+    end
+  end
 end

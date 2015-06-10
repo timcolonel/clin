@@ -1,4 +1,5 @@
 require 'clin'
+require 'clin/text'
 
 # Handle a choose question
 class Clin::ShellInteraction::Choose < Clin::ShellInteraction
@@ -41,19 +42,27 @@ class Clin::ShellInteraction::Choose < Clin::ShellInteraction
     end
   end
 
+  # Print help
   protected def print_choices_help(choices, allow_initials: false)
-    puts 'Choose from:'
+    puts choice_help(choices, allow_initals: allow_initials)
+  end
+
+  def choice_help(choices, allow_initials: false)
     used_initials = Set.new
-    choices.each do |choice, description|
-      suf = choice.to_s
-      suf += ", #{description}" unless description.blank?
-      line = if allow_initials && !used_initials.include?(choice[0])
-               used_initials << choice[0]
-               "  #{choice[0]} - #{suf}"
-             else
-               "      #{suf}"
-             end
-      puts line
+    Clin::Text.new do |t|
+      t.line 'Choose from:'
+      choices.each do |choice, description|
+        suf = choice.to_s
+        suf += ", #{description}" unless description.blank?
+        line = if !allow_initials
+                 suf
+               elsif used_initials.add?(choice[0])
+                 "#{choice[0]} - #{suf}"
+               else
+                 "    #{suf}"
+               end
+        t.line line, indent: 2
+      end
     end
   end
 end
