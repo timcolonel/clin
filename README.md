@@ -1,8 +1,8 @@
 # Clin
 [![Gem](https://img.shields.io/gem/v/clin.svg?style=flat-square)](http://rubygems.org/gems/clin)
-[![Build Status](https://travis-ci.org/timcolonel/clin.svg?branch=master&style=flat-square)](https://travis-ci.org/timcolonel/clin)
-[![Test Coverage](https://codeclimate.com/github/timcolonel/clin/badges/coverage.svg?style=flat-square)](https://codeclimate.com/github/timcolonel/clin/coverage)
-[![Code Climate](https://codeclimate.com/github/timcolonel/clin/badges/gpa.svg?style=flat-square)](https://codeclimate.com/github/timcolonel/clin)
+[![Build Status](https://img.shields.io/travis/timcolonel/clin/master.svg?style=flat-square)](https://travis-ci.org/timcolonel/clin)
+[![Test Coverage](https://img.shields.io/codeclimate/github/timcolonel/clin.svg?style=flat-square)](https://codeclimate.com/github/timcolonel/clin/coverage)
+[![Code Climate](https://img.shields.io/codeclimate/coverage/github/timcolonel/clin.svg?style=flat-square)](https://codeclimate.com/github/timcolonel/clin)
 [![Inline docs](http://inch-ci.org/github/timcolonel/clin.svg?branch=master&style=flat-square)](http://inch-ci.org/github/timcolonel/clin)
 
 Clin is Command Line Interface library that provide an clean api for complex command configuration.
