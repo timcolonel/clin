@@ -1,6 +1,7 @@
 ## 0.4.0
 Features:
     - Command line parsing is now done internally, i.e. removed optparse (#6).
+    - Added a text builder interface.
     
 Bug fix:
     - OptParse was hijacking the -v --version.

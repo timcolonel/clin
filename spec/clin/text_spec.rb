@@ -1,4 +1,4 @@
-require 'clin'
+require 'spec_helper'
 
 RSpec.describe Clin::Text do
   describe '#line' do
