@@ -32,6 +32,9 @@ class Clin::Text
     # * :right
     attr_accessor :alignment
 
+    # If blank cell should be separated with the column separator.
+    attr_accessor :separate_blank
+
     attr_accessor :column_length
 
     # @param col_delim [String] Set the column delimiter @see #column_delimiters
@@ -39,13 +42,15 @@ class Clin::Text
     # @param border [String] Set border @see #border
     # @param align [String] Set alignment @see #align
     # @param block [Proc] Block with self passed as param.
-    def initialize(col_delim: ' | ', row_delim: '-', border: true, align: :left, &block)
+    def initialize(col_delim: ' | ', row_delim: '-',
+                   border: true, align: :left, separate_blank: true, &block)
       @rows = []
       @header = nil
       @column_length = {}
       @column_delimiters = col_delim
       @row_delim = row_delim
       @border = border
+      @separate_blank = separate_blank
       @alignment = align
       block.call(self) if block_given?
     end
@@ -91,6 +96,10 @@ class Clin::Text
       @border
     end
 
+    def separate_blank?
+      separate_blank
+    end
+
     def vertical_border
       '|'
     end
@@ -114,6 +123,15 @@ class Clin::Text
     def update_column_length(index, cell_length)
       @column_length[index] ||= 0
       @column_length[index] = [cell_length, @column_length[index]].max
+    end
+
+    def delimiter_at(index)
+      return '' if index >= @column_length.size - 1
+      if @column_delimiters.is_a? Array
+        @column_delimiters[index]
+      else
+        @column_delimiters
+      end
     end
 
     protected def sym_or_array(*args)
@@ -158,12 +176,11 @@ class Clin::Text
     # @param index [Integer] Cell index.
     # Will return the corresponding delimiter and for the last cell will return ''
     def delimiter_at(index)
-      return '' if index >= @table.column_length.size - 1
-      if @table.column_delimiters.is_a? Array
-        @table.column_delimiters[index]
-      else
-        @table.column_delimiters
+      delim = @table.delimiter_at(index)
+      if !@table.separate_blank? && (@cells[index].blank? || @cells[index + 1].blank?)
+        delim = ' ' * delim.size
       end
+      delim
     end
 
     def to_s
@@ -207,7 +224,7 @@ class Clin::Text
     def initialize(table, index, value)
       @table = table
       @index = index
-      @value = value
+      @value = value.to_s
       @table.update_column_length(index, @value.length)
     end
 
@@ -215,6 +232,10 @@ class Clin::Text
     # @return [Integer]
     def length
       @table.column_length[@index]
+    end
+
+    def blank?
+      @value.blank?
     end
 
     # Get the alignment for this cell
@@ -234,11 +255,11 @@ class Clin::Text
     def to_s
       case align
       when :left
-        @value.ljust(length)
+        @value.to_s.ljust(length)
       when :right
-        @value.rjust(length)
+        @value.to_s.rjust(length)
       when :center
-        @value.center(length)
+        @value.to_s.center(length)
       else
         fail Clin::Error, "Invalid align #{align}"
       end

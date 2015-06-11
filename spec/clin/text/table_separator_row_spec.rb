@@ -2,15 +2,16 @@ require 'spec_helper'
 
 RSpec.describe Clin::Text::TableSeparatorRow do
   def table_double(options)
-    double(:table, options.reverse_merge(column_length: {}, update_column_length: true))
+    double(:table, options.reverse_merge(column_length: {}, update_column_length: true,
+                                         separate_blank?: true))
   end
 
-
   describe '#delimiter_at' do
-    let(:size) { 4 } # 4 columns(i.e. 3 Delimiters)
     let(:table) do
-      table_double(column_length: double(:col_length, size: size),
-                   column_delimiters: delimiter)
+      Clin::Text::Table.new do |t|
+        t.row %w(a b c d) # 4 columns(i.e. 3 Delimiters)
+        t.column_delimiter delimiter
+      end
     end
 
     subject { Clin::Text::TableSeparatorRow.new(table, '-', col_delimiter: include_column) }

@@ -51,17 +51,16 @@ class Clin::ShellInteraction::Choose < Clin::ShellInteraction
     used_initials = Set.new
     Clin::Text.new do |t|
       t.line 'Choose from:'
-      choices.each do |choice, description|
-        suf = choice.to_s
-        suf += ", #{description}" unless description.blank?
-        line = if !allow_initials
-                 suf
-               elsif used_initials.add?(choice[0])
-                 "#{choice[0]} - #{suf}"
-               else
-                 "    #{suf}"
-               end
-        t.line line, indent: 2
+      t.table(indent: 2, border: false, separate_blank: false) do |m|
+        m.column_delimiter(allow_initials ? [' - ', '  '] : ['  '])
+        choices.each do |choice, description|
+          if allow_initials
+            inital = used_initials.add?(choice[0]) ? choice[0] : nil
+            m.row inital, choice.to_s, description
+          else
+            m.row choice.to_s, description
+          end
+        end
       end
     end
   end

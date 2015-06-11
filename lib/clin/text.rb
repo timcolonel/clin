@@ -101,6 +101,10 @@ class Clin::Text
     @global_indent = previous_indent
   end
 
+  def table(indent: '', **options, &block)
+    text Clin::Text::Table.new(**options, &block).to_text, indent: indent
+  end
+
   # Join the lines together to form the output
   # @return [String]
   def to_s

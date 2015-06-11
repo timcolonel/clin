@@ -53,23 +53,32 @@ RSpec.describe Clin::ShellInteraction::Choose do
   end
 
   describe '#choice_help' do
+    def same?(value, actual)
+      expect(value.to_s.split("\n").map(&:rstrip)).to eq(actual.to_s.split("\n").map(&:rstrip))
+    end
+
     let(:choices) { {yes: 'You want it!', no: "No you don't!", yeeahno: "I can't make up my mind!"} }
     it 'get help without initials' do
-      expect(subject.choice_help(choices).to_s).to eq <<help
+      help = subject.choice_help(choices).to_s
+      expected = <<help
 Choose from:
-  yes, You want it!
-  no, No you don't!
-  yeeahno, I can't make up my mind!
+  yes      You want it!
+  no       No you don't!
+  yeeahno  I can't make up my mind!
 help
+      same?(help, expected)
     end
 
     it 'get help with initials' do
-      expect(subject.choice_help(choices, allow_initials: true).to_s).to eq <<help
+      help = subject.choice_help(choices, allow_initials: true).to_s
+      expected = <<help
 Choose from:
-  y - yes, You want it!
-  n - no, No you don't!
-      yeeahno, I can't make up my mind!
+  y - yes      You want it!
+  n - no       No you don't!
+      yeeahno  I can't make up my mind!
 help
+      same?(help, expected)
+      # expect(help).to eq(expected)
     end
   end
 end

@@ -132,6 +132,39 @@ RSpec.describe Clin::Text::Table do
       expect(subject.to_text._lines.size).to be 4
     end
   end
+
+
+  describe '#delimiter_at' do
+    before do
+      subject.row %w(a b c d) # 4 columns(i.e. 3 Delimiters)
+      subject.column_delimiter delimiter
+    end
+    context 'when delimiter is a global value' do
+      let(:delimiter) { ' # ' }
+      it { expect(subject.delimiter_at(0)).to eq(delimiter) }
+      it { expect(subject.delimiter_at(3)).to eq('') }
+      it { expect(subject.delimiter_at(10)).to eq('') }
+    end
+
+    context 'when delimiter is a global value' do
+      let(:delimiter) { ' # ' }
+      it { expect(subject.delimiter_at(0)).to eq(delimiter) }
+      it { expect(subject.delimiter_at(1)).to eq(delimiter) }
+      it { expect(subject.delimiter_at(2)).to eq(delimiter) }
+      it { expect(subject.delimiter_at(3)).to eq('') }
+      it { expect(subject.delimiter_at(10)).to eq('') }
+    end
+
+    context 'when delimiter is a specific' do
+      let(:delimiter) { [' # ', ' | ', ' [] '] }
+      it { expect(subject.delimiter_at(0)).to eq(delimiter[0]) }
+      it { expect(subject.delimiter_at(1)).to eq(delimiter[1]) }
+      it { expect(subject.delimiter_at(2)).to eq(delimiter[2]) }
+      it { expect(subject.delimiter_at(3)).to eq('') }
+      it { expect(subject.delimiter_at(10)).to eq('') }
+    end
+  end
+
   describe '#to_s' do
     subject do
       Clin::Text::Table.new(border: false) do |t|
