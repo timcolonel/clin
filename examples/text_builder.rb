@@ -25,7 +25,7 @@ text = Clin::Text.new do |t|
 end
 puts text
 
-table = Clin::Text::Table.new(border: true) do |t|
+table = Clin::Text::Table.new(border: true ) do |t|
   t.align :right, :center, :left
   # t.column_delimiter ' - ', ' # '
   t.header %w(First Last Email)

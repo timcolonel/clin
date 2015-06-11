@@ -1,24 +1,17 @@
 require 'spec_helper'
 
 RSpec.describe Clin::Text do
-  describe '#line' do
+  describe '#process_line' do
     let (:line) { Faker::Lorem::sentence }
     context 'when global indent is not set' do
       subject { Clin::Text.new }
 
-      it 'add only 1 line' do
-        subject.line(line)
-        expect(subject.lines.size).to be 1
-      end
-
-      it 'add a new line' do
-        subject.line(line)
-        expect(subject.lines.first).to eq(line)
+      it 'return the same line with no indent' do
+        expect(subject.process_line(line)).to eq(line)
       end
 
       it 'add a new line and indent' do
-        subject.line(line, indent: 2)
-        expect(subject.lines.first).to eq("  #{line}")
+        expect(subject.process_line(line, indent: 2)).to eq("  #{line}")
       end
     end
 
@@ -26,15 +19,41 @@ RSpec.describe Clin::Text do
       subject { Clin::Text.new(indent: '**') }
 
       it 'add line with global indent' do
-        subject.line(line)
-        expect(subject.lines.first).to eq("**#{line}")
+        expect(subject.process_line(line)).to eq("**#{line}")
       end
 
       it 'add line with global indent and method indent' do
-        subject.line(line, indent: 2)
-        expect(subject.lines.first).to eq("**  #{line}")
+        expect(subject.process_line(line, indent: 2)).to eq("**  #{line}")
       end
     end
+  end
+
+  describe '#line' do
+    let (:line1) { Faker::Lorem::sentence }
+    let (:line2) { Faker::Lorem::sentence }
+
+    before do
+      subject.line(line1)
+      subject.line(line2)
+    end
+
+    it { expect(subject.lines.size).to be 2 }
+    it { expect(subject.lines[0]).to eq line1 }
+    it { expect(subject.lines[1]).to eq line2 }
+  end
+
+  describe '#prefix' do
+    let (:line1) { Faker::Lorem::sentence }
+    let (:line2) { Faker::Lorem::sentence }
+
+    before do
+      subject.line(line1)
+      subject.prefix(line2)
+    end
+
+    it { expect(subject.lines.size).to be 2 }
+    it { expect(subject.lines[0]).to eq line2 }
+    it { expect(subject.lines[1]).to eq line1 }
   end
 
   describe '#blank' do
@@ -105,14 +124,17 @@ RSpec.describe Clin::Text do
     end
   end
 
+
   describe '#to_s' do
     let (:line1) { Faker::Lorem::sentence }
     let (:line2) { Faker::Lorem::sentence }
+    let (:line3) { Faker::Lorem::sentence }
 
     it 'join line with \n' do
       subject.line line1
       subject.line line2
-      expect(subject.to_s).to eq("#{line1}\n#{line2}\n")
+      subject.prefix line3
+      expect(subject.to_s).to eq("#{line3}\n#{line1}\n#{line2}\n")
     end
   end
 end

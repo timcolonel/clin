@@ -53,9 +53,17 @@ class Clin::Text
   # line('Some line', indent: '- ')   #=> '- Some line'
   # ```
   def line(text, indent: '')
-    indent = compute_indent(indent)
-    l = "#{global_indent}#{indent}#{text}"
+    l = process_line(text, indent: indent)
     @_lines << l
+    l
+  end
+
+  # Add a line at the beginning of the text
+  # @param text [String] line to add
+  # @param indent [String|Integer] Indent the line with x spaces or the given text
+  def prefix(text, indent: '')
+    l = process_line(text, indent: indent)
+    @_lines.unshift l
     l
   end
 
@@ -98,6 +106,19 @@ class Clin::Text
   def to_s
     "#{@_lines.join("\n")}\n"
   end
+
+  def process_line(text, indent: '')
+    indent = compute_indent(indent)
+    "#{global_indent}#{indent}#{text}"
+  end
+
+  def ==(other)
+    return to_s == other if other.is_a? String
+    return false unless other.is_a? Clin::Text
+    @_lines == other._lines && @global_indent == other.global_indent
+  end
+
+  alias_method :eql?, :==
 
   # Process the indent.
   # If the indent is an integer it will return +indent+ spaces

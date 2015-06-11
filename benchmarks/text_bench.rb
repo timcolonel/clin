@@ -23,6 +23,7 @@ Benchmark.ips do |x|
     values.each do |val|
       t << "***#{val}" << "\n"
     end
+    t = 'You have an error!' + "\n" << t
   end
 
   x.report('Normal +=') do
@@ -43,6 +44,7 @@ Benchmark.ips do |x|
     values.each do |val|
       t += "***#{val}" + "\n"
     end
+    t = 'You have an error!' + "\n" + t
   end
 
   x.report('Text builder') do
@@ -67,6 +69,8 @@ Benchmark.ips do |x|
       end
       t.line 'Values: '
       t.lines values, indent: '*** '
+
+      t.prefix 'You have an error!'
     end.to_s
   end
 

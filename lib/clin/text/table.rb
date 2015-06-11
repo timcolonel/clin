@@ -6,7 +6,7 @@ class Clin::Text
   # Helper class to display tables
   class Table
     # Header row(Nil for no header)
-    attr_accessor :header
+    attr_writer :header
 
     # List of rows in the table
     attr_accessor :rows
@@ -39,7 +39,7 @@ class Clin::Text
     # @param border [String] Set border @see #border
     # @param align [String] Set alignment @see #align
     # @param block [Proc] Block with self passed as param.
-    def initialize(col_delim: ' | ', row_delim: '-', border: false, align: :left, &block)
+    def initialize(col_delim: ' | ', row_delim: '-', border: true, align: :left, &block)
       @rows = []
       @header = nil
       @column_length = {}
@@ -53,13 +53,14 @@ class Clin::Text
     # Add a new row
     # @param cells [Array<String>] Cells.
     def row(*cells)
-      @rows << TableRow.new(self, cells.flatten)
+      @rows << TableRow.new(self, cells)
     end
 
-    # Set the header row.
+    # Set or get the header row.
     # @param cells [Array<String>] Cells.
     def header(*cells)
-      @header = TableRow.new(self, cells.flatten)
+      @header = TableRow.new(self, cells) if cells.any?
+      @header
     end
 
     # Add a separator row
@@ -94,16 +95,20 @@ class Clin::Text
       '|'
     end
 
-    def to_s
-      lines = []
+    # Build the text object for this table.
+    def to_text
+      t = Clin::Text.new
       unless @header.nil?
-        line = @header.to_s
-        lines << line
-        lines << TableSeparatorRow.new(self, col_delimiter: false).to_s
+        t.line @header.to_s
+        t.line TableSeparatorRow.new(self).to_s
       end
-      lines += @rows.map(&:to_s)
-      add_border(lines) if border?
-      "#{lines.join("\n")}\n"
+      t.lines @rows.map(&:to_s)
+      add_border(t) if border?
+      t
+    end
+
+    def to_s
+      to_text.to_s
     end
 
     def update_column_length(index, cell_length)
@@ -117,22 +122,25 @@ class Clin::Text
       args.size == 1 ? args.first : args
     end
 
-    protected def add_border(lines)
+    # Add the top and bottom border to the lines
+    protected def add_border(text)
       line = TableSeparatorRow.new(self, col_delimiter: false).to_s
-      lines.unshift(line)
-      lines << line
-      lines
+      text.prefix(line)
+      text.line line
+      text
     end
   end
 
   # Table Row container class
   class TableRow
     include Enumerable
+
+    # List of cells in the row.
     attr_accessor :cells
 
     def initialize(table, cells)
       @table = table
-      @cells = cells.each_with_index.map { |x, i| TableCell.new(table, i, x) }
+      @cells = cells.flatten.each_with_index.map { |x, i| TableCell.new(table, i, x) }
     end
 
     def each(&block)
@@ -170,14 +178,17 @@ class Clin::Text
 
   # Table row that is filled with the same character
   class TableSeparatorRow < TableRow
+    # Char used for separation.
+    attr_accessor :char
+
     def initialize(table, char = nil, col_delimiter: true)
       super(table, [])
       @char = char || @table.row_delim
       @include_column_delimiter = col_delimiter
     end
 
-    def column_delimiter(index)
-      col_delim = delimiter_at(index)
+    def delimiter_at(index)
+      col_delim = super(index)
       @include_column_delimiter ? col_delim : (@char * col_delim.size)
     end
 
@@ -185,7 +196,7 @@ class Clin::Text
       out = ''
       each_with_index do |_, i|
         out << @char * @table.column_length[i]
-        out << column_delimiter(i) unless i == @table.column_length.size - 1
+        out << delimiter_at(i)
       end
       border(out, @char)
     end
