@@ -1,4 +1,5 @@
 require 'clin'
+require 'clin/line_reader'
 
 # Class the offer helper method to interact with the user using the command line
 class Clin::Shell
@@ -18,14 +19,20 @@ class Clin::Shell
   # Ask a question
   # @param statement [String]
   # @param default [String]
-  # @param autocomplete [Array|Proc] Filter for autocomplete
-  def ask(statement, default: nil, autocomplete: nil)
-    answer = scan(statement, autocomplete: autocomplete)
+  # @param autocomplete [Array|Proc] Filter for autocomplete (Need Readline)
+  # @param echo [Boolean] If false no character will be displayed during input
+  # @param add_to_history [Boolean] If the answer should be added to history. (Need Readline)
+  def ask(statement, default: nil, autocomplete: nil, echo: true, add_to_history: true)
+    answer = scan(statement, autocomplete: autocomplete, echo: echo, add_to_history: add_to_history)
     if answer.blank?
       default
     else
       answer.strip
     end
+  end
+
+  def password(statement, default: nil)
+    ask(statement, default: default, echo: false, add_to_history: false)
   end
 
   # Ask a question and expect the result to be in the list of choices
@@ -104,18 +111,8 @@ class Clin::Shell
   end
 
   # Prompt the statement to the user and return his reply.
-  # @param statement [String]
-  # @param autocomplete [Array|Block]
-  protected def scan(statement, autocomplete: nil)
-    unless autocomplete.nil?
-      Readline.completion_proc = if autocomplete.is_a? Proc
-                                   autocomplete
-                                 else
-                                   proc { |s| autocomplete.grep(/^#{Regexp.escape(s)}/) }
-                                 end
-    end
-    Readline.completion_append_character = nil
-    Readline.readline(statement + ' ', true)
+  protected def scan(statement, options = {})
+    Clin::LineReader.scan(self, statement + ' ', options)
   end
 end
 

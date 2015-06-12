@@ -12,6 +12,9 @@ module Clin
     # Set the command when comparing 2 files(Used in the shell)
     attr_writer :diff_cmd
 
+    # If the line reader should use Readline(For autocomplete and history)
+    attr_writer :use_readline
+
     def default_exe_name
       'command'
     end
@@ -24,6 +27,10 @@ module Clin
 
     def diff_cmd
       @diff_cmd ||= 'diff -u'
+    end
+
+    def use_readline?
+      @use_readline ||= !ENV['CLIN_NO_READLINE']
     end
   end
 end
@@ -40,3 +47,4 @@ require 'clin/option'
 require 'clin/option_list'
 require 'clin/text'
 require 'clin/shell'
+require 'clin/line_reader'

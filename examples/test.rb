@@ -1,13 +1,10 @@
 $LOAD_PATH.push File.expand_path('../../lib', __FILE__)
-# require 'clin'
-# require 'json'
-require 'readline'
+require 'clin'
+require 'thor'
+s = Thor::Shell::Basic.new
+a = s.ask("What is your password?", :echo => false)
+
 # shell = Clin::Shell.new
-# a = shell.select('Choose: ', ['Choice a', 'Choice b', 'Choice c'])
-
-a = Readline.readline('What: ', true)
-puts 'Sle: ' + a
-
-puts 'Val: '
-a = gets
+#
+# a = shell.password('Password?')
 puts a
