@@ -24,10 +24,11 @@ class Clin::LineReader::Basic
   end
 
   protected def scan
-    if echo?
-      @shell.in.gets
-    else
+    return @shell.in.gets if echo?
+    begin
       @shell.in.noecho(&:gets)
+    rescue Errno::EBADF # If console doesn't suppose noecho
+      @shell.in.gets
     end
   end
 
