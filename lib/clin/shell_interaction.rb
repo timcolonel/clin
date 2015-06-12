@@ -32,3 +32,4 @@ end
 require 'clin/shell_interaction/file_conflict'
 require 'clin/shell_interaction/yes_or_no'
 require 'clin/shell_interaction/choose'
+require 'clin/shell_interaction/select'

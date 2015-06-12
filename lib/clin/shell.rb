@@ -43,6 +43,17 @@ class Clin::Shell
                                                  default: default, allow_initials: allow_initials)
   end
 
+  # Ask a question with a list of possible answer.
+  # Answer can either be selected using their name or their index
+  # e.g.
+  # Select answer:
+  # 1. Choice A
+  # 2. Choice B
+  # 3. Choice C
+  def select(statement, choices, default: nil)
+    Clin::ShellInteraction::Select.new(self).run(statement, choices, default: default)
+  end
+
   # Expect the user the return yes or no(y/n also works)
   # @param statement [String] Question to ask
   # @param default [String] Default value(yes/no)
