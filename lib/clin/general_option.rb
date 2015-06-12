@@ -3,7 +3,6 @@ require 'clin'
 # Parent class for reusable options across commands
 class Clin::GeneralOption
   include Clin::CommandMixin::Options
-  include Clin::CommandMixin::Options::ClassMethods
 
   def initialize(_config = {})
   end

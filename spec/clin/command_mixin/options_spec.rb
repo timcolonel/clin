@@ -42,4 +42,49 @@ RSpec.describe Clin::CommandMixin::Options do
     it { expect(subject.general_options.size).to be 1 }
     it { expect(subject.general_options.values.first).to eq(true) }
   end
+
+  describe '#options' do
+    subject { new_subject }
+    let(:option1) { double(:option1) }
+    let(:option2) { double(:option2) }
+    let(:option3) { double(:option3) }
+    let(:option4) { double(:option4) }
+    let(:general_option1) do
+      opt = Class.new(Clin::GeneralOption)
+      opt.add_option option3
+      opt.add_option option4
+      opt
+    end
+
+    let(:general_option2) do
+      opt = Class.new(Clin::GeneralOption)
+      opt.general_option general_option1
+      opt
+    end
+
+    it 'get every options' do
+      subject.add_option option1
+      subject.add_option option2
+      expect(subject.options).to eq([option1, option2])
+    end
+
+    it 'get every general option options' do
+      subject.general_option general_option1
+      expect(subject.options).to eq([option3, option4])
+    end
+
+    it 'get every options and general option options' do
+      subject.add_option option1
+      subject.add_option option2
+      subject.general_option general_option1
+      expect(subject.options).to eq([option1, option2, option3, option4])
+    end
+
+    it 'get nested general options' do
+      subject.add_option option1
+      subject.add_option option2
+      subject.general_option general_option2
+      expect(subject.options).to eq([option1, option2, option3, option4])
+    end
+  end
 end

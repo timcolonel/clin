@@ -6,20 +6,20 @@ module Clin::CommandMixin::Options
   extend ActiveSupport::Concern
 
   included do
-    self.options = []
+    self.specific_options = []
     self.general_options = {}
     # Trigger when a class inherit this class
     # It will clone attributes that need inheritance
     # @param subclass [Clin::Command]
     def self.inherited(subclass)
-      subclass.options = @options.clone
+      subclass.specific_options = @specific_options.clone
       subclass.general_options = @general_options.clone
       super
     end
   end
 
   module ClassMethods # :nodoc:
-    attr_accessor :options
+    attr_accessor :specific_options
     attr_accessor :general_options
 
     # Add an option.
@@ -69,7 +69,7 @@ module Clin::CommandMixin::Options
     # @param option [Clin::Option] option to add.
     def add_option(option)
       # Need to use += instead of << otherwise the parent class will also be changed
-      @options << option
+      @specific_options << option
     end
 
     # Add a general option
@@ -92,7 +92,7 @@ module Clin::CommandMixin::Options
     # @return [Hash] Where the options shall be extracted
     def option_defaults
       out = {}
-      @options.each do |option|
+      @specific_options.each do |option|
         option.load_default(out)
       end
 
@@ -114,6 +114,11 @@ module Clin::CommandMixin::Options
       general_options.each do |_cls, gopts|
         gopts.execute(options)
       end
+    end
+
+    # Return all options
+    def options
+      specific_options + general_options.keys.map(&:options).flatten
     end
 
     def find_option(value)
