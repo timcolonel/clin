@@ -2,12 +2,29 @@ require 'clin'
 
 # Command line positional argument(not option)
 class Clin::Argument
+  # Original name specified in the command
   attr_accessor :original
+
+  # If the argument is optional
   attr_accessor :optional
+
+  # If the argument accept multiple values
   attr_accessor :multiple
+
+  # If the argument is a fixed argument(User value need to match the name)
   attr_accessor :variable
+
+  # The name extracted without the brackets and arrows.
+  # This will be the key in the params when initializing a command
   attr_accessor :name
 
+  # Create a new argument from string
+  # +argument+ will be used to deduce the name, if it's fixed, optional, accept multiple values
+  # If the argument is a simple string(e.g. install) then it will be a fixed argument
+  # For the argument to accept variable values it must be surrounded with <> (e.g. <command>)
+  # For the argument to be optional it must be surrounded with [] (e.g. [<value>])
+  # For the argument to accept multiple value it must be suffixed with ... (e.g. <commands>...)
+  # @param argument [String] argument Value
   def initialize(argument)
     @original = argument
     @optional = false

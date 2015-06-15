@@ -15,6 +15,9 @@ class Clin::ShellInteraction::FileConflict < Clin::ShellInteraction
     result
   end
 
+  # Handle the use choice
+  # @return [Boolean] true/false if the user made a choice or
+  #   nil if the question needs to be asked again
   protected def handle_choice(choice, filename, &block)
     case choice
     when :yes

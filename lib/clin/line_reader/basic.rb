@@ -27,7 +27,7 @@ class Clin::LineReader::Basic
     return @shell.in.gets if echo?
     begin
       @shell.in.noecho(&:gets)
-    rescue Errno::EBADF # If console doesn't suppose noecho
+    rescue Errno::EBADF # If console doesn't support noecho
       @shell.in.gets
     end
   end

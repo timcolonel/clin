@@ -37,10 +37,12 @@ class Clin::Text
 
     attr_accessor :column_length
 
+    # Create a new table
     # @param col_delim [String] Set the column delimiter @see #column_delimiters
     # @param row_delim [String] Set the row delimiter @see #row_delim
     # @param border [String] Set border @see #border
     # @param align [String] Set alignment @see #align
+    # @param separate_blank [Boolean] If the column separator should be added near blank cells
     # @param block [Proc] Block with self passed as param.
     def initialize(col_delim: ' | ', row_delim: '-',
                    border: true, align: :left, separate_blank: true, &block)

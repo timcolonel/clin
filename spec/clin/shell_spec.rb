@@ -17,6 +17,14 @@ RSpec.describe Clin::Shell do
     end
   end
 
+  describe '#password' do
+    it 'call ask with echo and add_to_history false' do
+      expect(subject).to receive(:ask)
+                           .with('Password?', default: 'lorem', echo: false, add_to_history: false)
+      subject.password('Password?', default: 'lorem')
+    end
+  end
+
   describe '#choose' do
     let(:countries) { %w(usa france germany italy) }
 
@@ -33,6 +41,16 @@ RSpec.describe Clin::Shell do
     it 'ask for a choice and user can reply with initials' do
       expects_scan('Where are you from? [ufgi]', 'i')
       expect(subject.choose('Where are you from?', countries, allow_initials: true)).to eq('italy')
+    end
+  end
+
+  describe '#select' do
+    it 'call ask with echo and add_to_history false' do
+      select = double(:select_interaction)
+      choices = %w(France Germany Italy Spain)
+      expect(select).to receive(:run).with('Where are you from?', choices, default: 'France')
+      expect(Clin::ShellInteraction::Select).to receive(:new).and_return(select)
+      subject.select('Where are you from?', choices, default: 'France')
     end
   end
 
@@ -142,6 +160,14 @@ RSpec.describe Clin::Shell do
     it 'ask the user and return true when he reply yes' do
       expects_scan("Overwrite 'some.txt'? [yNaqh]", '')
       expect(subject.keep?('some.txt')).to be false
+    end
+  end
+
+  describe '#scan' do
+    it 'call LineReader.scan' do
+      options = {opt1: 'val1', opt2: 'val2'}
+      expect(Clin::LineReader).to receive(:scan).with(subject, 'Where are you from? ', options)
+      subject.send(:scan, 'Where are you from?', options)
     end
   end
 end
