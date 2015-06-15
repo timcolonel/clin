@@ -5,6 +5,22 @@ RSpec.describe Clin::Shell do
     expect(subject).to receive(:scan).with(message, any_args).and_return(*outputs).exactly(outputs.size).times
   end
 
+  describe '#say' do
+    it 'call text#line' do
+      expect(subject.out).to receive(:puts).with('  Lorem Ipsum')
+      subject.say('Lorem Ipsum', indent: 2)
+    end
+  end
+
+  describe '#indent' do
+    it 'call text#line' do
+      expect(subject.out).to receive(:puts).with('  **Lorem Ipsum')
+      subject.indent 2 do
+        subject.say('Lorem Ipsum', indent: '**')
+      end
+    end
+  end
+
   describe '#ask' do
     it 'ask for a question and return user reply' do
       expects_scan('What is your name?', 'Smith')

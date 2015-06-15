@@ -37,10 +37,14 @@ class Clin::Text
   # All the lines added to this text will be indented with this.
   attr_accessor :global_indent
 
+  # List of block that listen for line added to the next builder.
+  attr_accessor :listeners
+
   def initialize(indent: '', &block)
     @_lines = []
     @inital_indent = compute_indent(indent)
     @global_indent = @inital_indent
+    @listeners = []
     block.call(self) if block_given?
   end
 
@@ -55,6 +59,7 @@ class Clin::Text
   def line(text, indent: '')
     l = process_line(text, indent: indent)
     @_lines << l
+    broadcast(l)
     l
   end
 
@@ -71,6 +76,7 @@ class Clin::Text
   # @param times [Integer] Number of times to add the line.
   def blank(times = 1)
     @_lines += [''] * times
+    times.times.each { broadcast('') }
   end
 
   # Add a list of string as lines or get the existing lines.
@@ -114,6 +120,17 @@ class Clin::Text
   def process_line(text, indent: '')
     indent = compute_indent(indent)
     "#{global_indent}#{indent}#{text}"
+  end
+
+  def on(&block)
+    @listeners << block
+  end
+
+  # Call the the listener with the newly added line
+  def broadcast(line)
+    @listeners.each do |block|
+      block.call(line)
+    end
   end
 
   def ==(other)

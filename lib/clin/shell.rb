@@ -9,11 +9,24 @@ class Clin::Shell
   # Output stream, default: STDOUT
   attr_accessor :out
 
+  # Text builder instance that is used to stream
+  attr_accessor :text
+
   def initialize(input: STDIN, output: STDOUT)
     @in = input
     @out = output
     @yes_or_no_persist = false
     @override_persist = false
+    @text = Clin::Text.new
+  end
+
+  def say(line, indent: '')
+    @out.puts text.line(line, indent: indent)
+  end
+
+  # Indent the current output
+  def indent(indent, &block)
+    text.indent(indent, &block)
   end
 
   # Ask a question

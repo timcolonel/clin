@@ -2,6 +2,9 @@
 Features:
     - Command line parsing is now done internally, i.e. removed optparse (#6).
     - Added a text builder interface.
+    - Added a table builder interface.
+    - Shell interact with text builder interface
+    - Shell#say, Shell#indent, Shell#password
     
 Bug fix:
     - OptParse was hijacking the -v --version.

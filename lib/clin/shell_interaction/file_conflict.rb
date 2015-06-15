@@ -27,7 +27,7 @@ class Clin::ShellInteraction::FileConflict < Clin::ShellInteraction
     when :always
       return persist!
     when :quit
-      puts 'Aborting...'
+      shell.say 'Aborting...'
       fail SystemExit
     when :diff
       show_diff(filename, block.call)

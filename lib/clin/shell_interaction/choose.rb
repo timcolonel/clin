@@ -44,7 +44,7 @@ class Clin::ShellInteraction::Choose < Clin::ShellInteraction
 
   # Print help
   protected def print_choices_help(choices, allow_initials: false)
-    puts choice_help(choices, allow_initals: allow_initials)
+    shell.say choice_help(choices, allow_initals: allow_initials)
   end
 
   def choice_help(choices, allow_initials: false)

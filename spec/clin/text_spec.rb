@@ -137,4 +137,22 @@ RSpec.describe Clin::Text do
       expect(subject.to_s).to eq("#{line3}\n#{line1}\n#{line2}\n")
     end
   end
+
+  describe '#on' do
+    it 'register a new callback' do
+      b = proc { |line|}
+      subject.on(&b)
+      expect(subject.listeners).to eq([b])
+    end
+  end
+
+  describe '#broadcast' do
+    it 'register a new callback' do
+      b = proc { |line|}
+      subject.on(&b)
+      subject.on(&b)
+      expect(b).to receive(:call).with('some line').twice
+      subject.broadcast('some line')
+    end
+  end
 end

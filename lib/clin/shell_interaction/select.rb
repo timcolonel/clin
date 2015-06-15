@@ -11,8 +11,8 @@ class Clin::ShellInteraction::Select < Clin::ShellInteraction::Choose
   def run(statement, choices, default: nil, start_index: 1)
     choices = convert_choices(choices)
     loop do
-      puts statement
-      puts choice_help(choices, start_index)
+      shell.say statement
+      shell.say choice_help(choices, start_index)
       answer = @shell.ask('>', default: default, autocomplete: choices.keys)
       next if answer.nil?
       choice = get_choice(choices, answer, start_index)
