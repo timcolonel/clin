@@ -174,8 +174,17 @@ RSpec.describe Clin::Shell do
 
   describe '#keep?' do
     it 'ask the user and return true when he reply yes' do
-      expects_scan("Overwrite 'some.txt'? [yNaqh]", '')
+      expects_scan("Overwrite 'some.txt'? [yNaqh]", 'y')
       expect(subject.keep?('some.txt')).to be false
+    end
+
+    it 'ask the user and return true when he reply yes' do
+      expects_scan("Overwrite 'some.txt'? [yNaqh]", 'n')
+      expect(subject.keep?('some.txt')).to be true
+    end
+    it 'ask the user and return true when he reply yes' do
+      expects_scan("Overwrite 'some.txt'? [yNaqh]", '')
+      expect(subject.keep?('some.txt')).to be true
     end
   end
 

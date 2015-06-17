@@ -35,6 +35,9 @@ class Clin::Text
     # If blank cell should be separated with the column separator.
     attr_accessor :separate_blank
 
+    # Internal use to keep track of the column length(in characters)
+    # Is a hash of column index mapping the their current length
+    # @return [Hash]
     attr_accessor :column_length
 
     # Create a new table
@@ -94,19 +97,29 @@ class Clin::Text
       @column_delimiters = sym_or_array(*args)
     end
 
+    # Does this table render the border
+    # @see #border
+    # @return [Boolean]
     def border?
       @border
     end
 
+    # Does this table separate blank cells
+    # @see #separate_blank
+    # @return [Boolean]
     def separate_blank?
       separate_blank
     end
 
+    # Vertical border
+    # Default '|'
+    # @return [String]
     def vertical_border
-      '|'
+      @vertical_border ||= '|'
     end
 
     # Build the text object for this table.
+    # @return [Clin::Text]
     def to_text
       t = Clin::Text.new
       unless @header.nil?
@@ -118,15 +131,25 @@ class Clin::Text
       t
     end
 
+    # Build the table and get the string
+    # @return [String]
     def to_s
       to_text.to_s
     end
 
+    # Update the length of the column at +index+ with +cell_length+
+    # if +cell_length+ is larger than the current value
+    # @param index [Integer] Column index
+    # @param cell_length [Integer] Column length in character
     def update_column_length(index, cell_length)
       @column_length[index] ||= 0
       @column_length[index] = [cell_length, @column_length[index]].max
     end
 
+    # Get the delimiter after the column at +index+
+    # Will return blank if it's the last column
+    # Will handle global or specific column_delimiter values
+    # @return [String]
     def delimiter_at(index)
       return '' if index >= @column_length.size - 1
       if @column_delimiters.is_a? Array
@@ -136,6 +159,8 @@ class Clin::Text
       end
     end
 
+    # Handle arguments that can either be a symbol or an array of symbol(Potentially nested)
+    # Used by attributes that accept a global value(Symbol) or a column specific value
     protected def sym_or_array(*args)
       return args if args.empty?
       args.flatten!
@@ -143,6 +168,8 @@ class Clin::Text
     end
 
     # Add the top and bottom border to the lines
+    # @param text [Clin::Text] Text containing the rest of the table
+    # @return [Clin::Text]
     protected def add_border(text)
       line = TableSeparatorRow.new(self, col_delimiter: false).to_s
       text.prefix(line)
@@ -158,17 +185,25 @@ class Clin::Text
     # List of cells in the row.
     attr_accessor :cells
 
+    # Initialize a new table row
+    # @param table [Clin::Text::Table] table containing the row
+    # @param cells [Array<String>]
     def initialize(table, cells)
       @table = table
       @cells = cells.flatten.each_with_index.map { |x, i| TableCell.new(table, i, x) }
     end
 
+    # Iterate through each cells
+    # @param block [Proc] take a [Clin::Table::TableCell] as argument
     def each(&block)
       @table.column_length.size.times.each do |i|
         block.call(@cells[i] || '')
       end
     end
 
+    # If the table should render border it add the vertical border the the line
+    # @param text [String] Current line
+    # @param separator [String] Separate the line from the border(With a space for example)
     def border(text, separator = '')
       return text unless @table.border?
       @table.vertical_border + separator + text + separator + @table.vertical_border
@@ -185,6 +220,8 @@ class Clin::Text
       delim
     end
 
+    # Render the row
+    # @return [String]
     def to_s
       out = ''
       each_with_index do |cell, i|

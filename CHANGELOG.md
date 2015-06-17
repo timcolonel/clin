@@ -1,3 +1,7 @@
+## 0.5.0
+Features:
+    - Shell#keep? now inverse the user choice(User say `yes` to overwrite keep return `false`)(#7)
+
 ## 0.4.0
 Features:
     - Command line parsing is now done internally, i.e. removed optparse (#6).

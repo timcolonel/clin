@@ -12,6 +12,9 @@ class Clin::Shell
   # Text builder instance that is used to stream
   attr_accessor :text
 
+  # Initialize a new shell
+  # @param input [IO] @see #in
+  # @param output [IO] @see #out
   def initialize(input: STDIN, output: STDOUT)
     @in = input
     @out = output
@@ -20,11 +23,17 @@ class Clin::Shell
     @text = Clin::Text.new
   end
 
+  # Print the given line to the user.
+  # @param line [String]
+  # @param indent [String|Integer] Indent the line
+  # @see Clin::Text#line
   def say(line, indent: '')
     @out.puts text.line(line, indent: indent)
   end
 
-  # Indent the current output
+  # Indent all the line created using #say inside +block+
+  # @param indent [String|Integer] Indent the line
+  # @param block [Proc] Indent will only be applied inside this block.
   def indent(indent, &block)
     text.indent(indent, &block)
   end
@@ -44,6 +53,11 @@ class Clin::Shell
     end
   end
 
+  # Helper method for asking a question where the user input is not displayed on screen
+  # and not added to history
+  # @param statement [String]
+  # @param default [String]
+  # @see #ask
   def password(statement, default: nil)
     ask(statement, default: default, echo: false, add_to_history: false)
   end
@@ -119,8 +133,13 @@ class Clin::Shell
   end
 
   # File conflict question defaulted to no
+  # Ask the user if he want to overwrite the +filename+
+  # Inverse the output of #file_conflict:
+  # user say yes to overwrite => no to keeping the file so return false
+  # @see #file_conflict
+  # @return [Boolean] true if user say no and false if user say yes
   def keep?(filename, &block)
-    file_conflict(filename, default: :no, &block)
+    !file_conflict(filename, default: :no, &block)
   end
 
   # Prompt the statement to the user and return his reply.
